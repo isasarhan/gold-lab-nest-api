@@ -10,4 +10,4 @@ import { Payment, PaymentSchema } from './schema/customer-payment.schema';
   providers: [CustomerPaymentService],
   exports: [CustomerPaymentService],
 })
-export class InvoiceModule { }
+export class CustomerPaymentModule { }
