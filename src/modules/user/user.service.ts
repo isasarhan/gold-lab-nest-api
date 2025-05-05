@@ -2,9 +2,9 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
 import { Model, ObjectId, Types } from 'mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { GetUsersFilterDto } from './dto/get-users.dto';
+import { CreateUserDto } from './dto/create.dto';
+import { UpdateUserDto } from './dto/update.dto';
+import { GetUsersFilterDto } from './dto/getAll.dto';
 import { IFilter } from 'src/common/types/filter';
 
 @Injectable()

@@ -4,11 +4,10 @@ import * as bcrypt from 'bcryptjs';
 import { ObjectId, Types } from 'mongoose';
 
 export enum Role {
-  ADMIN = 'admin',
-  USER = 'user',
-  MANAGER = 'manager',
-  MODERATOR = 'moderator',
-  LEADER = 'leader',
+  Admin = 'admin',
+  User = 'user',
+  Manager = 'manager',
+  Moderator = 'moderator',
 }
 
 @Schema({ _id: false })
@@ -62,7 +61,7 @@ export class User {
   @Prop()
   profileUrl: string;
 
-  @Prop({ type: String, enum: Role, default: Role.USER })
+  @Prop({ type: String, enum: Role, default: Role.User })
   role: Role;
 
   @Prop({ type: Boolean, default: false })

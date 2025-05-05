@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common"
 import * as jwt from 'jsonwebtoken'
-import { CreateUserDto } from "../user/dto/create-user.dto"
+import { CreateUserDto } from "../user/dto/create.dto"
 import { UserService } from "../user/user.service"
 
 @Injectable()

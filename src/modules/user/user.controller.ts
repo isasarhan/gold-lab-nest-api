@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { GetUserDto } from './dto/get-user.dto';
-import { CreateUserDto } from './dto/create-user.dto';
-import { GetUsersFilterDto } from './dto/get-users.dto';
+import { UpdateUserDto } from './dto/update.dto';
+import { GetUserDto } from './dto/getOne.dto';
+import { CreateUserDto } from './dto/create.dto';
+import { GetUsersFilterDto } from './dto/getAll.dto';
 import { UserService } from './user.service';
 import { Role } from './schema/user.schema';
 
@@ -18,7 +18,7 @@ export class UserController {
         return await this.userService.findById(params.id)
     }
 
-    @Roles(Role.ADMIN)
+    @Roles(Role.Admin)
     @Get()
     async findAll(@Query() args: GetUsersFilterDto) {
         const filters = this.userService.filter(args)
@@ -31,13 +31,13 @@ export class UserController {
         return await this.userService.create(createUserDto)
     }
 
-    @Roles(Role.ADMIN)
+    @Roles(Role.Admin)
     @Put(':id')
     async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return await this.userService.update(id, updateUserDto)
     }
 
-    @Roles(Role.ADMIN)
+    @Roles(Role.Admin)
     @Delete(':id')
     async delete(@Param('id') id: string) {
         return await this.userService.delete(id);
