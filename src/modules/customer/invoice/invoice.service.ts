@@ -1,20 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Invoice } from './schema/invoice.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateInvoiceDto } from './dto/create.dto';
 import { UpdateInvoiceDto } from './dto/update.dto';
+import { IFilter } from 'src/common/types/filter';
+import { GetInvoicesFilterDto } from './dto/getAll.dto';
 
 @Injectable()
 export class InvoiceService {
-  constructor(@InjectModel(Invoice.name) private model: Model<Invoice>) {}
+  constructor(@InjectModel(Invoice.name) private model: Model<Invoice>) { }
 
   create(dto: CreateInvoiceDto) {
     return this.model.create(dto);
   }
 
-  findAll() {
-    return this.model.find().populate('customer').populate('orders');
+  filter(args: GetInvoicesFilterDto): IFilter {
+    return {
+      ...args.customer && { customer: new Types.ObjectId(args.customer) },
+      ...args.startDate && args.endDate && { date: { $gte: args.startDate, $lt: args.endDate } }
+    }
+  }
+
+  findAll(filters: IFilter) {
+    return this.model.find(filters).populate('customer')
   }
 
   findOne(id: string) {

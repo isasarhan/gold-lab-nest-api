@@ -9,7 +9,7 @@ import { UpdateOrderDto } from './dto/update.dto';
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly model: Model<Order>,
-  ) {}
+  ) { }
 
   create(dto: CreateOrderDto) {
     return this.model.create(dto);
@@ -21,6 +21,10 @@ export class OrderService {
 
   findOne(id: string) {
     return this.model.findById(id).populate('customer').exec();
+  }
+
+  async findByCustomerId(id: string) {
+    return await this.model.find().where({ customer: id }).populate("customer");
   }
 
   async update(id: string, dto: UpdateOrderDto) {
