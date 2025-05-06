@@ -18,7 +18,6 @@ export class UserController {
         return await this.userService.findById(params.id)
     }
 
-    @Roles(Role.Admin)
     @Get()
     async findAll(@Query() args: GetUsersFilterDto) {
         const filters = this.userService.filter(args)
@@ -31,13 +30,11 @@ export class UserController {
         return await this.userService.create(createUserDto)
     }
 
-    @Roles(Role.Admin)
     @Put(':id')
     async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return await this.userService.update(id, updateUserDto)
     }
 
-    @Roles(Role.Admin)
     @Delete(':id')
     async delete(@Param('id') id: string) {
         return await this.userService.delete(id);

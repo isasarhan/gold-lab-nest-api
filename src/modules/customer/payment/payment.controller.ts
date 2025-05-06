@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Param, Body, Query } from '@nestjs/common';
 import { CustomerPaymentService } from './payment.service';
 import { CreateCustomerPaymentDto } from './dto/create.dto';
 import { UpdateCustomerPaymentDto } from './dto/update.dto';
+import { GetPaymentsFilterDto } from './dto/getAll.dto';
 
 @Controller('payments')
 export class CustomerPaymentController {
@@ -13,8 +14,9 @@ export class CustomerPaymentController {
   }
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query() args: GetPaymentsFilterDto) {
+    const filters = this.service.filter(args)
+    return this.service.findAll(filters);
   }
 
   @Get(':id')

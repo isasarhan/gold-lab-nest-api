@@ -12,7 +12,7 @@ export class CustomerService {
     @InjectModel(Customer.name) private readonly customerModel: Model<Customer>,
   ) {}
 
-  async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
+  async create(createCustomerDto: CreateCustomerDto){
     const createdCustomer = new this.customerModel(createCustomerDto);
     return createdCustomer.save();
   }
@@ -21,13 +21,13 @@ export class CustomerService {
     return this.customerModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Customer> {
+  async findOne(id: string){
     const customer = await this.customerModel.findById(id).exec();
     if (!customer) throw new NotFoundException('Customer not found');
     return customer;
   }
 
-  async update(id: string, updateCustomerDto: UpdateCustomerDto): Promise<Customer> {
+  async update(id: string, updateCustomerDto: UpdateCustomerDto){
     const customer = await this.customerModel.findByIdAndUpdate(id, updateCustomerDto, {
       new: true,
       runValidators: true,

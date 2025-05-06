@@ -3,9 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BalanceService } from './balance.service';
 import { BalanceController } from './balance.controller';
 import { Balance, BalanceSchema } from './schema/balance.schema';
+import { CustomerModule } from '../customer/customer.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Balance.name, schema: BalanceSchema }])],
+  imports: [CustomerModule, MongooseModule.forFeature([{ name: Balance.name, schema: BalanceSchema }])],
   controllers: [BalanceController],
   providers: [BalanceService],
   exports: [BalanceService, MongooseModule],
