@@ -5,7 +5,7 @@ import { UpdateBalanceDto } from './dto/update.dto';
 
 @Controller('balances')
 export class BalanceController {
-  constructor(private readonly balanceService: BalanceService) {}
+  constructor(private readonly balanceService: BalanceService) { }
 
   @Post()
   create(@Body() dto: CreateBalanceDto) {
@@ -17,6 +17,16 @@ export class BalanceController {
     return this.balanceService.findAll();
   }
 
+  @Get('total')
+  getTotals() {
+    return this.balanceService.getTotal();
+  }
+
+
+  @Get('customer/:id')
+  findByCustomer(@Param('id') id: string) {
+    return this.balanceService.findByCustomer(id);
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.balanceService.findOne(id);
@@ -25,6 +35,11 @@ export class BalanceController {
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateBalanceDto) {
     return this.balanceService.update(id, dto);
+  }
+
+  @Put('customer/:id')
+  updateByCustomer(@Param('id') id: string, @Body() dto: UpdateBalanceDto) {
+    return this.balanceService.updateByCustomer(id, dto.gold, dto.cash);
   }
 
   @Delete(':id')

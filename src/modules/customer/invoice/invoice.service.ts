@@ -41,4 +41,86 @@ export class InvoiceService {
     if (!deleted) throw new NotFoundException('Invoice not found');
     return deleted;
   }
+
+  async aggregateYearlyRevenue(customerId: string | null, year: number) {
+    const match: any = {
+      createdAt: {
+        $gte: new Date(year, 0, 1),
+        $lt: new Date(year + 1, 0, 1),
+      },
+    };
+
+    if (customerId) {
+      match.customer = customerId;
+    }
+
+    return this.model.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          totalCash: { $sum: "$totalCash" },
+          totalWeight: { $sum: "$totalWeight" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          totalCash: 1,
+          totalWeight: 1,
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+  }
+
+  async findGroupedByCustomerAndDate(startDate: Date, endDate: Date) {
+
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          date: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            customerId: '$customer'
+          },
+          totalWeight: { $sum: '$totalWeight' },
+          totalCash: { $sum: '$totalCash' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'customers',
+          localField: '_id.customerId',
+          foreignField: '_id',
+          as: 'customerDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$customerDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          customer: '$customerDetails.name',
+          totalWeight: { $ifNull: ['$totalWeight', 0] },
+          totalCash: { $ifNull: ['$totalCash', 0] }
+        }
+      },
+      {
+        $sort: { customer: 1 }
+      }
+    ]);
+    return result;
+
+  }
 }

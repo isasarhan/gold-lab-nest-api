@@ -1,6 +1,7 @@
 import { IsEmail, IsMongoId, IsOptional } from "class-validator";
+import { Pagination } from "src/common/types/filter";
 
-export class GetUsersFilterDto {
+export class GetUsersFilterDto extends Pagination{
     @IsOptional()
     phone?: string
 

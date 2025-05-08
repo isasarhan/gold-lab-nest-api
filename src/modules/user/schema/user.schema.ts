@@ -1,31 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Type } from 'class-transformer';
 import * as bcrypt from 'bcryptjs';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 export enum Role {
   Admin = 'admin',
   User = 'user',
   Manager = 'manager',
   Moderator = 'moderator',
-}
-
-@Schema({ _id: false })
-class Address {
-  @Prop()
-  street: string;
-
-  @Prop()
-  building: string;
-
-  @Prop()
-  floor: string;
-
-  @Prop()
-  country: string;
-
-  @Prop()
-  city: string;
 }
 
 @Schema()
@@ -50,13 +31,6 @@ export class User {
 
   @Prop()
   isSuperAdmin: boolean;
-
-  @Prop({ type: Address })
-  @Type(() => Address)
-  address: Address
-
-  @Prop()
-  nationality: string;
 
   @Prop()
   profileUrl: string;

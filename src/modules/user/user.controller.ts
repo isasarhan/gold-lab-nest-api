@@ -24,9 +24,11 @@ export class UserController {
         const result =  await this.userService.findAll(filters)                
         return result
     }
-    @Roles()
+
     @Post('add')
     async add(@Body() createUserDto: CreateUserDto) {        
+        console.log('createUserDto', createUserDto);
+        
         return await this.userService.create(createUserDto)
     }
 

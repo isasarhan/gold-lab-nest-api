@@ -17,7 +17,7 @@ import { UpdateCustomerDto } from './dto/update.dto';
   export class CustomerController {
     constructor(private readonly customerService: CustomerService) {}
   
-    @Post()
+    @Post('add')
     create(@Body() createCustomerDto: CreateCustomerDto): Promise<Customer> {
       return this.customerService.create(createCustomerDto);
     }

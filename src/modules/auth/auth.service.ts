@@ -30,6 +30,6 @@ export class AuthService {
 
     private generateJwtToken(userId: string): string {
         const payload = { userId }
-        return jwt.sign(payload, process.env.JWT_SECRET || 'secretjwt', { expiresIn: '1d' })
+        return jwt.sign(payload, process.env.JWT_SECRET || 'mysecretjwtkey2648', { expiresIn: '1d' })
     }
 }

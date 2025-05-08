@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { HydratedDocument } from "mongoose";
 
 export enum CustomerType {
     Individual = 'individual',     // فرد
@@ -28,6 +29,7 @@ export class Customer {
     @Prop({ type: String, enum: CustomerType, default: CustomerType.Retailer })
     type: CustomerType;
 }
+export type CustomerDocument = HydratedDocument<Customer>;
 
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer);
