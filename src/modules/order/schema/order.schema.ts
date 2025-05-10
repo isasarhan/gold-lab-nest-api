@@ -3,6 +3,7 @@ import { ObjectId, Types } from 'mongoose';
 
 export enum ItemType {
   Gormet = 'gormet',
+  LAZER = 'lazer',
   Boul = 'boul',
   Lock = 'lock',
   Stamp = 'stamp',

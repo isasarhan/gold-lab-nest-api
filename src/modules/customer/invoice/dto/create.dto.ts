@@ -2,10 +2,13 @@ import {
     IsArray,
     IsDateString,
     IsMongoId,
+    IsNotEmpty,
     IsNumber,
     IsOptional,
     IsString,
   } from 'class-validator';
+import { Types } from 'mongoose';
+import { CreateOrderDto } from 'src/modules/order/dto/create.dto';
   
   export class CreateInvoiceDto {
     @IsOptional()
@@ -13,11 +16,11 @@ import {
     invoiceNb?: string;
   
     @IsMongoId()
-    customer: string;
+    customer: Types.ObjectId;
   
     @IsArray()
-    @IsMongoId({ each: true })
-    orders: string[];
+    @IsNotEmpty()
+    orders: CreateOrderDto[];
   
     @IsOptional()
     @IsNumber()

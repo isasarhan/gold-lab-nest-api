@@ -43,9 +43,9 @@ export class AnalyticService {
             const graph: { customer: string, totalCash: 0, totalWeight: 0 }[] = [];
 
             const revenues = await this.invoiceService.findGroupedByCustomerAndDate(currentMonth, endOfMonth);
-            const customers = await this.customerService.findAll();
+            const customers = await this.customerService.findAll({});
 
-            for (const customer of customers) {
+            for (const customer of customers.data) {
                 const result = revenues.find((v) => v.customer === customer.name);
                 graph.push(result || { customer: customer.name, totalCash: 0, totalWeight: 0 });
             }

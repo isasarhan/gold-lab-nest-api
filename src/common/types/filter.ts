@@ -6,6 +6,9 @@ export class Pagination {
 
   @IsOptional()
   pageSize?: number;
+
+  @IsOptional()
+  searchTerm?: string
 }
 
 export type IFilter = Record<string, any>;

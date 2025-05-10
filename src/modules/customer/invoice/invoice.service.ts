@@ -6,25 +6,82 @@ import { CreateInvoiceDto } from './dto/create.dto';
 import { UpdateInvoiceDto } from './dto/update.dto';
 import { IFilter } from 'src/common/types/filter';
 import { GetInvoicesFilterDto } from './dto/getAll.dto';
+import { OrderService } from 'src/modules/order/order.service';
+import { Karat } from 'src/modules/order/schema/order.schema';
 
 @Injectable()
 export class InvoiceService {
-  constructor(@InjectModel(Invoice.name) private model: Model<Invoice>) { }
+  constructor(@InjectModel(Invoice.name) private model: Model<Invoice>,
+    private orderService: OrderService,
 
-  create(dto: CreateInvoiceDto) {
-    return this.model.create(dto);
+  ) { }
+
+  parseKarat = (karat: Karat) => {
+    switch (karat) {
+      case Karat.K18:
+        return 750
+      case Karat.K21:
+        return 875
+      default:
+        return 750
+    }
+  }
+  async create(dto: CreateInvoiceDto) {
+    const { orders, ...rest } = dto
+    const orderResult = await this.orderService.createMany(dto.orders)
+
+    let ordersIds: Types.ObjectId[] = []
+    let totalWeight = 0
+    let totalCash = 0
+
+    orderResult.forEach((order) => {
+      ordersIds.push(order._id)
+      totalCash += order.weight * order.perGram + (order.perItem * order.quantity);
+      totalWeight += order.weight * this.parseKarat(order.karat) / 995;
+    })
+
+    return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer) });
   }
 
   filter(args: GetInvoicesFilterDto): IFilter {
     return {
       ...args.customer && { customer: new Types.ObjectId(args.customer) },
-      ...args.startDate && args.endDate && { date: { $gte: args.startDate, $lt: args.endDate } }
+      ...args.startDate && args.endDate && { date: { $gte: new Date(args.startDate), $lt: new Date(args.endDate) } },
+      ...args.searchTerm && {
+        $or: [
+          { invoiceNb: { $regex: args.searchTerm, $options: 'i' } },
+        ],
+      },
     }
   }
 
-  findAll(filters: IFilter) {
-    return this.model.find(filters).populate('customer')
+  async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+    const finalLimit = filters.pageSize || limit;
+
+    if (!filters.customer) {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        pages: 0,
+      };
+    }
+
+    const skip = (page - 1) * finalLimit;
+
+    const [invoices, total] = await Promise.all([
+      this.model.find(filters).limit(finalLimit).skip(skip).exec(),
+      this.model.countDocuments(filters),
+    ]);
+
+    return {
+      data: invoices,
+      total,
+      page,
+      pages: Math.ceil(total / finalLimit),
+    };
   }
+
 
   findOne(id: string) {
     return this.model.findById(id).populate('customer').populate('orders');

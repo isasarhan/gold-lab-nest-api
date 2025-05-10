@@ -6,6 +6,8 @@ import { Customer } from './schema/customer.schema';
 import { CreateCustomerDto } from './dto/create.dto';
 import { UpdateCustomerDto } from './dto/update.dto';
 import { BalanceService } from '../balance/balance.service';
+import { IFilter } from 'src/common/types/filter';
+import { GetCustomerFilterDto } from './dto/getAll.dto';
 
 @Injectable()
 export class CustomerService {
@@ -20,9 +22,35 @@ export class CustomerService {
     this.balanceService.create({ customer: createdCustomer._id.toString() })
     return customer
   }
-  
-  async findAll(): Promise<Customer[]> {
-    return this.customerModel.find().exec();
+
+  filter(args: GetCustomerFilterDto): IFilter {
+    return {
+      ...args.name && { name: args.name },
+      ...args.email && { email: args.name },
+      ...args.phone && { phone: args.name },
+      ...args.searchTerm && {
+        $or: [
+          { name: { $regex: args.searchTerm, $options: 'i' } },
+          { email: { $regex: args.searchTerm, $options: 'i' } },
+          { phone: { $regex: args.searchTerm, $options: 'i' } },
+        ],
+      },
+    }
+  }
+  async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+    const skip = (page - 1) * limit;
+
+    const [events, total] = await Promise.all([
+      this.customerModel.find(filters).limit(filters.pageSize || limit).skip(skip).exec(),
+      this.customerModel.countDocuments(),
+    ]);
+
+    return {
+      data: events,
+      total,
+      page,
+      pages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: string) {

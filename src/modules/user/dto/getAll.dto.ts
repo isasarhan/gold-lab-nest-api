@@ -12,6 +12,4 @@ export class GetUsersFilterDto extends Pagination{
     @IsOptional()
     username?: string
 
-    @IsOptional()
-    searchTerm?: string
 }

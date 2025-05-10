@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Invoice {
@@ -21,5 +21,6 @@ export class Invoice {
   @Prop({ default: Date.now })
   date: Date;
 }
+export type InvoiceDocument = HydratedDocument<Invoice>;
 
 export const InvoiceSchema = SchemaFactory.createForClass(Invoice);

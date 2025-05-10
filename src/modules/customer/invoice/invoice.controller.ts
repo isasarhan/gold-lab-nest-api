@@ -8,15 +8,15 @@ import { GetInvoicesFilterDto } from './dto/getAll.dto';
 export class InvoiceController {
   constructor(private readonly service: InvoiceService) {}
 
-  @Post()
+  @Post('add')
   create(@Body() dto: CreateInvoiceDto) {
     return this.service.create(dto);
   }
 
   @Get()
-  findAll(@Query() args:GetInvoicesFilterDto) {
+  findAll(@Query() args:GetInvoicesFilterDto) {            
     const filters = this.service.filter(args)
-    return this.service.findAll(filters);
+    return this.service.findAll(filters, args.page, args.pageSize);
   }
 
   @Get(':id')
