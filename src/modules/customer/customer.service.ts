@@ -12,12 +12,12 @@ import { GetCustomerFilterDto } from './dto/getAll.dto';
 @Injectable()
 export class CustomerService {
   constructor(
-    @InjectModel(Customer.name) private readonly customerModel: Model<Customer>,
+    @InjectModel(Customer.name) private readonly model: Model<Customer>,
     @Inject(forwardRef(() => BalanceService)) private balanceService: BalanceService,
   ) { }
 
   async create(createCustomerDto: CreateCustomerDto) {
-    const createdCustomer = new this.customerModel(createCustomerDto);
+    const createdCustomer = new this.model(createCustomerDto);
     const customer = await createdCustomer.save();
     this.balanceService.create({ customer: createdCustomer._id.toString() })
     return customer
@@ -41,8 +41,8 @@ export class CustomerService {
     const skip = (page - 1) * limit;
 
     const [events, total] = await Promise.all([
-      this.customerModel.find(filters).limit(filters.pageSize || limit).skip(skip).exec(),
-      this.customerModel.countDocuments(),
+      this.model.find(filters).limit(filters.pageSize || limit).skip(skip).exec(),
+      this.model.countDocuments(),
     ]);
 
     return {
@@ -54,13 +54,13 @@ export class CustomerService {
   }
 
   async findOne(id: string) {
-    const customer = await this.customerModel.findById(id).exec();
+    const customer = await this.model.findById(id).exec();
     if (!customer) throw new NotFoundException('Customer not found');
     return customer;
   }
 
   async update(id: string, updateCustomerDto: UpdateCustomerDto) {
-    const customer = await this.customerModel.findByIdAndUpdate(id, updateCustomerDto, {
+    const customer = await this.model.findByIdAndUpdate(id, updateCustomerDto, {
       new: true,
       runValidators: true,
     }).exec();
@@ -69,7 +69,7 @@ export class CustomerService {
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.customerModel.findByIdAndDelete(id).exec();
+    const result = await this.model.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException('Customer not found');
   }
 }

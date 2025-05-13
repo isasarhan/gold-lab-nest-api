@@ -44,7 +44,6 @@ export class EmployeeAttenndenceService {
         return this.model.insertMany(validAttendances);
     }
 
-
     async parseUploadedAttendence(file: Express.Multer.File) {
         const workbook = XLSX.read(file.buffer, { type: 'buffer' });
 
@@ -80,17 +79,42 @@ export class EmployeeAttenndenceService {
                 departure: departureDateTime,
             };
         }));
-        
+
         return await this.createMany(attendances)
-        
+
     }
 
     filter(args: GetAttendenceFilterDto): IFilter {
-        return {
-            ...args.employee && { employee: new Types.ObjectId(args.employee) },
-            ...args.startDate && args.endDate && { date: { $gte: new Date(args.startDate), $lt: new Date(args.endDate) } },
+        const filter: IFilter = {};
+
+        if (args.employee) {
+            filter.employee = new Types.ObjectId(args.employee);
         }
+
+        if (args.startDate && args.endDate) {
+            filter.arrival = {
+                $gte: new Date(args.startDate),
+                $lt: new Date(args.endDate),
+            };
+        } else if (args.year && args.month) {
+            const start = new Date(args.year, args.month - 1, 1); // months are 0-indexed
+            const end = new Date(args.year, args.month, 1); // next month
+            filter.arrival = {
+                $gte: start,
+                $lt: end,
+            };
+        } else if (args.year) {
+            const start = new Date(args.year, 0, 1);
+            const end = new Date(args.year + 1, 0, 1);
+            filter.arrival = {
+                $gte: start,
+                $lt: end,
+            };
+        }
+
+        return filter;
     }
+
 
     async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
         const finalLimit = filters.pageSize || limit;
