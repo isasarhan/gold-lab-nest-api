@@ -1,21 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { EmployeeAttenndence } from './schema/employee-attendence.schema';
+import { EmployeeAttendence } from './schema/employee-attendence.schema';
 import { CreateEmployeeAttendenceDto } from './dto/create.dto';
 import { UpdateEmployeeAttendenceDto } from './dto/update.dto';
 import * as XLSX from 'xlsx';
 import { EmployeeService } from '../employee.service';
-import { excelDateToJSDate } from 'src/utils/date-utilities';
+import { dateFormatter, excelDateToJSDate } from 'src/utils/date-utilities';
+import { IFilter } from 'src/common/types/filter';
+import { GetAttendenceFilterDto } from './dto/getAll.dto';
 
 @Injectable()
 export class EmployeeAttenndenceService {
     constructor(
-        @InjectModel(EmployeeAttenndence.name) private readonly model: Model<EmployeeAttenndence>,
+        @InjectModel(EmployeeAttendence.name) private readonly model: Model<EmployeeAttendence>,
         private employeeService: EmployeeService,
     ) { }
 
-    async create(dto: CreateEmployeeAttendenceDto): Promise<EmployeeAttenndence> {
+    async create(dto: CreateEmployeeAttendenceDto): Promise<EmployeeAttendence> {
         const employeeAttenndence = new this.model(dto);
         return employeeAttenndence.save();
     }
@@ -53,6 +55,8 @@ export class EmployeeAttenndenceService {
             };
         });
         let parseResult = worksheets[0].data
+        console.log('parseResult', parseResult);
+
 
         const attendances = await Promise.all(parseResult.map(async (row: any) => {
             const { date, arrival, departure, phone } = row;
@@ -60,20 +64,15 @@ export class EmployeeAttenndenceService {
             const employee = await this.employeeService.findByPhone(phone)
             if (!employee)
                 throw new NotFoundException('Employee not found');
+            const baseDate = excelDateToJSDate(date);
 
-            const arrivalDateTime = new Date(
-                excelDateToJSDate(date).setHours(
-                    excelDateToJSDate(arrival).getHours(),
-                    excelDateToJSDate(arrival).getMinutes()
-                )
-            );
+            // Extract arrival and departure times as fractional values
+            const arrivalTime = excelDateToJSDate(arrival);  // Arrival time in JS Date format
+            const departureTime = excelDateToJSDate(departure);  // Departure time in JS Date format
 
-            const departureDateTime = new Date(
-                excelDateToJSDate(date).setHours(
-                    excelDateToJSDate(departure).getHours(),
-                    excelDateToJSDate(departure).getMinutes()
-                )
-            );
+            // Set the time for arrival and departure (keeping the base date)
+            const arrivalDateTime = new Date(baseDate.setHours(arrivalTime.getHours(), arrivalTime.getMinutes(), arrivalTime.getSeconds()));
+            const departureDateTime = new Date(baseDate.setHours(departureTime.getHours(), departureTime.getMinutes(), departureTime.getSeconds()));
 
             return {
                 employee: employee._id.toString(),
@@ -81,21 +80,60 @@ export class EmployeeAttenndenceService {
                 departure: departureDateTime,
             };
         }));
-
+        
         return await this.createMany(attendances)
+        
     }
 
-    async findAll(): Promise<EmployeeAttenndence[]> {
-        return this.model.find().exec();
+    filter(args: GetAttendenceFilterDto): IFilter {
+        return {
+            ...args.employee && { employee: new Types.ObjectId(args.employee) },
+            ...args.startDate && args.endDate && { date: { $gte: new Date(args.startDate), $lt: new Date(args.endDate) } },
+        }
     }
 
-    async findOne(id: string): Promise<EmployeeAttenndence> {
+    async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+        const finalLimit = filters.pageSize || limit;
+
+        if (!filters.employee) {
+            return {
+                data: [],
+                total: 0,
+                page: 1,
+                pages: 0,
+            };
+        }
+
+        const skip = (page - 1) * finalLimit;
+
+        const [attendences, total] = await Promise.all([
+            this.model.find(filters).limit(finalLimit).skip(skip).exec(),
+            this.model.countDocuments(filters),
+        ]);
+
+        return {
+            data: attendences.map((entry) => {
+                const date = new Date(entry.arrival)
+                const departureDate = new Date(entry.departure)
+                return {
+                    date: dateFormatter(date.toString()),
+                    arrival: date.getHours() + date.getMinutes() / 60, // e.g. 5.5 = 5:30 AM
+                    departure: departureDate.getHours() + departureDate.getMinutes() / 60, // e.g. 5.5 = 5:30 AM
+                }
+            }),
+            total,
+            page,
+            pages: Math.ceil(total / finalLimit),
+        };
+    }
+
+    async findOne(id: string): Promise<EmployeeAttendence> {
         const EmployeeAttenndence = await this.model.findById(id).exec();
         if (!EmployeeAttenndence) throw new NotFoundException('EmployeeAttenndence not found');
         return EmployeeAttenndence;
     }
 
-    async update(id: string, dto: UpdateEmployeeAttendenceDto): Promise<EmployeeAttenndence> {
+    async update(id: string, dto: UpdateEmployeeAttendenceDto): Promise<EmployeeAttendence> {
         const employeeAttenndence = await this.model.findByIdAndUpdate(id, dto, { new: true }).exec();
         if (!employeeAttenndence) throw new NotFoundException('Employee attenndence not found');
         return employeeAttenndence;

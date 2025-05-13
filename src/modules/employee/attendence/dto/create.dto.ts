@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsOptional, IsString, IsNumber, IsEmail, IsNotEmpty, IsMongoId, IsDate } from 'class-validator';
 
 export class CreateEmployeeAttendenceDto {
@@ -5,11 +6,13 @@ export class CreateEmployeeAttendenceDto {
   @IsMongoId()
   employee: string;
   
+  @IsOptional()
+  @Type(() => Date)
   @IsDate()
-  @IsNotEmpty()
-  arrival: Date;
-  
+  arrival?: Date;
+
+  @IsOptional()
+  @Type(() => Date)
   @IsDate()
-  @IsNotEmpty()
-  departure: Date
+  departure?: Date;
 }

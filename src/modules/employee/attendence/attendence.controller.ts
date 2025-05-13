@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Put, Delete, Param, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Param, Body, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
 import { EmployeeAttenndenceService } from './attendence.service';
 import { CreateEmployeeAttendenceDto } from './dto/create.dto';
 import { UpdateEmployeeAttendenceDto } from './dto/update.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { GetAttendenceFilterDto } from './dto/getAll.dto';
 
-@Controller('attendence')
+@Controller('attendences')
 export class EmployeeAttendenceController {
   constructor(private readonly service: EmployeeAttenndenceService) { }
 
@@ -22,8 +23,9 @@ export class EmployeeAttendenceController {
   }
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query() args: GetAttendenceFilterDto) {
+    const filters = this.service.filter(args)
+    return this.service.findAll(filters);
   }
 
   @Get(':id')

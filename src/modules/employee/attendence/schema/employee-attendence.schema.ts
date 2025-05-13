@@ -1,10 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { Employee } from '../../schema/employee.schema';
 
 @Schema({ timestamps: true })
-export class EmployeeAttenndence {
+export class EmployeeAttendence {
     @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
-    employee: Types.ObjectId;
+    employee: Types.ObjectId | Employee;
 
     @Prop()
     arrival: Date;
@@ -14,4 +15,4 @@ export class EmployeeAttenndence {
 
 }
 
-export const EmployeeAttendenceSchema = SchemaFactory.createForClass(EmployeeAttenndence);
+export const EmployeeAttendenceSchema = SchemaFactory.createForClass(EmployeeAttendence);

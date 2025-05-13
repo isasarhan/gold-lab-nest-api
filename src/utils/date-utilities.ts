@@ -17,7 +17,18 @@ export function combineDateAndTime(dateStr: string, timeStr: string): Date {
 }
 
 export function excelDateToJSDate(serial: number): Date {
-    const excelEpoch = new Date(1899, 11, 30);
-    const milliseconds = serial * 24 * 60 * 60 * 1000;
-    return new Date(excelEpoch.getTime() + milliseconds);
+ const epoch = new Date(Date.UTC(1899, 11, 30)); // Excel's base date is 1899-12-30
+    const msPerDay = 86400000; // Number of milliseconds in one day
+    const date = new Date(epoch.getTime() + serial * msPerDay);
+    return date;
+}
+
+export const dateFormatter = (value:string) => {
+    const date = new Date(value);
+    const formattedDate = date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+    });
+    return formattedDate
 }
