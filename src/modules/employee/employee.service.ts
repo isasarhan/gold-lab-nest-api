@@ -9,7 +9,7 @@ import { UpdateEmployeeDto } from './dto/update.dto';
 export class EmployeeService {
   constructor(
     @InjectModel(Employee.name) private readonly employeeModel: Model<Employee>,
-  ) {}
+  ) { }
 
   async create(dto: CreateEmployeeDto): Promise<Employee> {
     const employee = new this.employeeModel(dto);
@@ -22,6 +22,11 @@ export class EmployeeService {
 
   async findOne(id: string): Promise<Employee> {
     const employee = await this.employeeModel.findById(id).exec();
+    if (!employee) throw new NotFoundException('Employee not found');
+    return employee;
+  }
+  async findByPhone(phone: string){
+    const employee = await this.employeeModel.findOne({ phone }).exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return employee;
   }

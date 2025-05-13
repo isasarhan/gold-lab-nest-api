@@ -21,14 +21,12 @@ export class UserController {
     @Get()
     async findAll(@Query() args: GetUsersFilterDto) {
         const filters = this.userService.filter(args)
-        const result =  await this.userService.findAll(filters)                
+        const result = await this.userService.findAll(filters)
         return result
     }
 
     @Post('add')
-    async add(@Body() createUserDto: CreateUserDto) {        
-        console.log('createUserDto', createUserDto);
-        
+    async add(@Body() createUserDto: CreateUserDto) {
         return await this.userService.create(createUserDto)
     }
 

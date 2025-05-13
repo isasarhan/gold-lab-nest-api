@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { Order } from './schema/order.schema';
 import { CreateOrderDto } from './dto/create.dto';
 import { UpdateOrderDto } from './dto/update.dto';
@@ -16,12 +16,15 @@ export class OrderService {
   }
 
   createMany(dto: CreateOrderDto[]) {
-    return this.model.insertMany(dto.map((order)=>{
+    const orders = dto.map((order) => {
       return {
         ...order,
-        customer: new Types.ObjectId(order.customer)
-      }
-    }));
+        customer: new Types.ObjectId(order.customer),
+      };
+    });
+
+    return this.model.insertMany(orders);
+
   }
 
   findAll() {

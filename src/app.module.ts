@@ -18,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
+import { EmployeeAttenndenceModule } from './modules/employee/attendence/attendence.module';
 
 @Module({
   imports:
@@ -26,7 +27,7 @@ import configuration from './config/configuration';
       load: [configuration],
     }),
     MongooseModule.forRoot(`${process.env.DATABASE_HOST}`),
-    AuthModule, UserModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
+      AuthModule, EmployeeAttenndenceModule, UserModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
       SupplyPaymentModule, InvoiceModule, InventoryModule, SupplierModule, SupplyModule, SettingModule, EmployeeModule, CustomerPaymentModule],
   controllers: [AppController],
   providers: [AppService],

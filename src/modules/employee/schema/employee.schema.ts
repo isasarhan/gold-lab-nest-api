@@ -8,7 +8,7 @@ export class Employee {
   @Prop()
   position: string;
 
-  @Prop()
+  @Prop({ unique: true })
   phone: string;
 
   @Prop()
