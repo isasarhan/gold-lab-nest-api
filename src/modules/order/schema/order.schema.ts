@@ -9,6 +9,11 @@ export enum ItemType {
   Stamp = 'stamp',
   Ramle = 'ramle',
   Forza = 'forza',
+  WeddingRing = 'wedding ring',
+  Ring = 'ring',
+  Bracelet = 'bracelet',
+  Necklace = 'necklace',
+  Bangle = 'bangle',
   Other = 'other',
 }
 

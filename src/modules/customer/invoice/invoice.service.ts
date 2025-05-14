@@ -39,8 +39,8 @@ export class InvoiceService {
       totalCash += order.weight * order.perGram + (order.perItem * order.quantity);
       totalWeight += order.weight * this.parseKarat(order.karat) / 995;
     })
-
-    return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer) });
+    
+    return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer) , totalCash, totalWeight});
   }
 
   filter(args: GetInvoicesFilterDto): IFilter {

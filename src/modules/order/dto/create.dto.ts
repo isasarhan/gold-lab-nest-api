@@ -9,6 +9,7 @@ export class CreateOrderDto {
   weight: number;
 
   @IsEnum(Karat)
+  @IsOptional()
   karat: Karat;
 
   @IsNumber()
@@ -20,8 +21,9 @@ export class CreateOrderDto {
   @IsOptional()
   @IsString()
   invoiceNb?: string;
-
+  
   @IsEnum(ItemType)
+  @IsOptional()
   type: ItemType;
 
   @IsNumber()
