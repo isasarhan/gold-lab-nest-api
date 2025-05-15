@@ -9,14 +9,18 @@ import { GetInvoicesFilterDto } from './dto/getAll.dto';
 import { OrderService } from 'src/modules/order/order.service';
 import { Karat } from 'src/modules/order/schema/order.schema';
 import { parseKarat } from 'src/utils';
+import { BalanceService } from 'src/modules/balance/balance.service';
 
 @Injectable()
 export class InvoiceService {
   constructor(@InjectModel(Invoice.name) private model: Model<Invoice>,
     @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
+    private balanceService: BalanceService,
   ) { }
 
   async create(dto: CreateInvoiceDto) {
+    console.log('dto', dto);
+    
     const { orders, ...rest } = dto
     const orderResult = await this.orderService.createMany(dto.orders)
 
@@ -29,7 +33,7 @@ export class InvoiceService {
       totalCash += order.weight * order.perGram + (order.perItem * order.quantity);
       totalWeight += order.weight * parseKarat(order.karat) / 995;
     })
-
+    await this.balanceService.updateByCustomer(dto.customer.toString(), totalWeight, totalCash)
     return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer), totalCash, totalWeight });
   }
 

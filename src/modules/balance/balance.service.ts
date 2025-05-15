@@ -44,7 +44,7 @@ export class BalanceService {
     if (!result)
       throw new NotFoundException('Customer Not Found!');
 
-    return await this.balanceModel.findById({ customer: result._id }).populate('customer').exec();
+    return await this.balanceModel.findById({ customer: result._id }).exec();
   }
 
   async getTotal() {
@@ -93,6 +93,8 @@ export class BalanceService {
   }
 
   async updateByCustomer(customerId: string, gold?: number, cash?: number) {
+    console.log('customerId',customerId);
+    
     try {
       const customer = await this.customerService.findOne(customerId);
       if (!customer) {
