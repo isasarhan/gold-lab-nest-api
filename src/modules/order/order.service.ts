@@ -1,14 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Order } from './schema/order.schema';
 import { CreateOrderDto } from './dto/create.dto';
 import { UpdateOrderDto } from './dto/update.dto';
+import { InvoiceService } from '../customer/invoice/invoice.service';
+import { parseKarat } from 'src/utils';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly model: Model<Order>,
+    @Inject(forwardRef(() => InvoiceService)) private invoiceService: InvoiceService,
   ) { }
 
   create(dto: CreateOrderDto) {
@@ -45,9 +48,34 @@ export class OrderService {
     return updated;
   }
 
-  async remove(id: string) {
-    const deleted = await this.model.findByIdAndDelete(id);
-    if (!deleted) throw new NotFoundException('Order not found');
+  async remove(id: string, invoiceId?: string) {
+    const order = await this.model.findById(id)
+    if (!order)
+      throw new NotFoundException('order not found!')
+
+    if (!invoiceId) {
+      const deleted = await this.model.findByIdAndDelete(order._id);
+      if (!deleted) throw new NotFoundException('order not found');
+      return deleted;
+    }
+
+    const invoice = await this.invoiceService.findOne(invoiceId)
+    if (!invoice)
+      throw new NotFoundException('invoice not found!')
+
+    let orders: Types.ObjectId[] = invoice.orders.filter(
+      (id) => !id.equals(order._id)
+    );
+    let totalWeight = invoice.totalWeight
+    let totalCash = invoice.totalCash
+
+    totalCash -= order.weight * order.perGram + (order.perItem * order.quantity);
+    totalWeight -= order.weight * parseKarat(order.karat) / 995;
+
+    await this.invoiceService.update(invoiceId, { orders, totalWeight, totalCash })
+
+    const deleted = await this.model.findByIdAndDelete(order._id);
+    if (!deleted) throw new NotFoundException('order not found');
     return deleted;
   }
 }

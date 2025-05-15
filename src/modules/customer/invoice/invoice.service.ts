@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Invoice } from './schema/invoice.schema';
 import { Model, Types } from 'mongoose';
@@ -8,24 +8,14 @@ import { IFilter } from 'src/common/types/filter';
 import { GetInvoicesFilterDto } from './dto/getAll.dto';
 import { OrderService } from 'src/modules/order/order.service';
 import { Karat } from 'src/modules/order/schema/order.schema';
+import { parseKarat } from 'src/utils';
 
 @Injectable()
 export class InvoiceService {
   constructor(@InjectModel(Invoice.name) private model: Model<Invoice>,
-    private orderService: OrderService,
-
+    @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
   ) { }
 
-  parseKarat = (karat: Karat) => {
-    switch (karat) {
-      case Karat.K18:
-        return 750
-      case Karat.K21:
-        return 875
-      default:
-        return 750
-    }
-  }
   async create(dto: CreateInvoiceDto) {
     const { orders, ...rest } = dto
     const orderResult = await this.orderService.createMany(dto.orders)
@@ -37,10 +27,10 @@ export class InvoiceService {
     orderResult.forEach((order) => {
       ordersIds.push(order._id)
       totalCash += order.weight * order.perGram + (order.perItem * order.quantity);
-      totalWeight += order.weight * this.parseKarat(order.karat) / 995;
+      totalWeight += order.weight * parseKarat(order.karat) / 995;
     })
-    
-    return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer) , totalCash, totalWeight});
+
+    return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer), totalCash, totalWeight });
   }
 
   filter(args: GetInvoicesFilterDto): IFilter {
@@ -94,9 +84,17 @@ export class InvoiceService {
   }
 
   async remove(id: string) {
-    const deleted = await this.model.findByIdAndDelete(id);
-    if (!deleted) throw new NotFoundException('Invoice not found');
-    return deleted;
+    const invoice = await this.model.findById(id)
+    if (!invoice)
+      throw new NotFoundException('invoice not found!')
+
+    await Promise.all(
+      invoice.orders.map((order) =>
+        this.orderService.remove(order._id.toString())
+      )
+    );
+
+    return await this.model.findByIdAndDelete(id);
   }
 
   async aggregateYearlyRevenue(customerId: string | null, year: number) {
