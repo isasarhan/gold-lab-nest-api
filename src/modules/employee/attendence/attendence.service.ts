@@ -54,8 +54,6 @@ export class EmployeeAttenndenceService {
             };
         });
         let parseResult = worksheets[0].data
-        console.log('parseResult', parseResult);
-
 
         const attendances = await Promise.all(parseResult.map(async (row: any) => {
             const { date, arrival, departure, phone } = row;

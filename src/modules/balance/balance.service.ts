@@ -22,7 +22,7 @@ export class BalanceService {
     if (!customer)
       throw new NotFoundException('Customer Not Found!');
 
-    const balance = new this.balanceModel(dto);
+    const balance = new this.balanceModel({ ...dto, customer: customer._id });
     return balance.save();
   }
 
@@ -31,6 +31,7 @@ export class BalanceService {
   }
 
   async findOne(id: string): Promise<BalanceDocument> {
+
     const balance = await this.balanceModel.findById(id).populate('customer').exec();
     if (!balance) throw new NotFoundException('Balance not found');
     return balance;
@@ -43,8 +44,7 @@ export class BalanceService {
     const result = await this.customerService.findOne(customer);
     if (!result)
       throw new NotFoundException('Customer Not Found!');
-
-    return await this.balanceModel.findById({ customer: result._id }).exec();
+    return await this.balanceModel.findOne({ customer: result._id }).exec();
   }
 
   async getTotal() {
@@ -93,8 +93,7 @@ export class BalanceService {
   }
 
   async updateByCustomer(customerId: string, gold?: number, cash?: number) {
-    console.log('customerId',customerId);
-    
+
     try {
       const customer = await this.customerService.findOne(customerId);
       if (!customer) {
@@ -119,7 +118,6 @@ export class BalanceService {
 
       return updatedBalance;
     } catch (error) {
-      console.error('Failed to update balance:', error);
       throw new InternalServerErrorException('Unable to update balance');
     }
   }
@@ -139,7 +137,6 @@ export class BalanceService {
 
       await this.remove(balance._id);
     } catch (error) {
-      console.error('Failed to delete balance:', error);
       throw new InternalServerErrorException('Unable to delete balance');
     }
   }

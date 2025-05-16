@@ -18,9 +18,7 @@ export class InvoiceService {
     private balanceService: BalanceService,
   ) { }
 
-  async create(dto: CreateInvoiceDto) {
-    console.log('dto', dto);
-    
+  async create(dto: CreateInvoiceDto) {    
     const { orders, ...rest } = dto
     const orderResult = await this.orderService.createMany(dto.orders)
 
@@ -97,6 +95,7 @@ export class InvoiceService {
         this.orderService.remove(order._id.toString())
       )
     );
+    await this.balanceService.updateByCustomer(invoice.customer.toString(), -invoice.totalWeight, -invoice.totalCash)
 
     return await this.model.findByIdAndDelete(id);
   }
