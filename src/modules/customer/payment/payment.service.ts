@@ -6,25 +6,33 @@ import { CreateCustomerPaymentDto } from './dto/create.dto';
 import { UpdateCustomerPaymentDto } from './dto/update.dto';
 import { GetPaymentsFilterDto } from './dto/getAll.dto';
 import { IFilter } from 'src/common/types/filter';
+import { BalanceService } from 'src/modules/balance/balance.service';
 
 @Injectable()
 export class CustomerPaymentService {
   constructor(
     @InjectModel(Payment.name)
-    private model: Model<Payment>
+    private model: Model<Payment>,
+    private balanceService: BalanceService,
+
   ) { }
 
   create(dto: CreateCustomerPaymentDto) {
     return this.model.create(dto);
   }
-  createMany(dto: CreateCustomerPaymentDto[]) {
+  async createMany(dto: CreateCustomerPaymentDto[]) {
     const payments = dto.map((payment) => {
       return {
         ...payment,
         customer: new Types.ObjectId(payment.customer),
       };
     });
-    const addedPayments =  this.model.insertMany(payments);
+    const addedPayments = await this.model.insertMany(payments);
+    await Promise.all(
+      addedPayments.map((payment) => {
+        this.balanceService.updateByCustomer(payment.customer.toString(),
+          -(payment?.weight! * payment.karat!) / 1000, -payment.cash!)
+      }))
 
     return addedPayments
   }
@@ -80,9 +88,11 @@ export class CustomerPaymentService {
   }
 
   async remove(id: string) {
-    const deleted = await this.model.findByIdAndDelete(id);
-    if (!deleted) throw new NotFoundException('Customer Payment not found');
-    return deleted;
+    const receipt = await this.model.findById(id)
+    if (!receipt)
+      throw new NotFoundException('receipt not found!')
+    this.balanceService.updateByCustomer(receipt.customer.toString(), -(receipt?.weight! * receipt.karat!) / 1000, -receipt.cash!)
+    return await this.model.findByIdAndDelete(id);
   }
 
   async aggregateKaserGoldRevenue(customerId: string | null, year: number) {
