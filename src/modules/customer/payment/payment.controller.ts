@@ -4,13 +4,17 @@ import { CreateCustomerPaymentDto } from './dto/create.dto';
 import { UpdateCustomerPaymentDto } from './dto/update.dto';
 import { GetPaymentsFilterDto } from './dto/getAll.dto';
 
-@Controller('payments')
+@Controller('receipts')
 export class CustomerPaymentController {
   constructor(private readonly service: CustomerPaymentService) {}
 
-  @Post()
+  @Post("add")
   create(@Body() dto: CreateCustomerPaymentDto) {
     return this.service.create(dto);
+  }
+  @Post("add/bulk")
+  createMany(@Body() dto: CreateCustomerPaymentDto[]) {
+    return this.service.createMany(dto);
   }
 
   @Get()

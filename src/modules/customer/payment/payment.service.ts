@@ -17,17 +17,57 @@ export class CustomerPaymentService {
   create(dto: CreateCustomerPaymentDto) {
     return this.model.create(dto);
   }
-  
+  createMany(dto: CreateCustomerPaymentDto[]) {
+    const payments = dto.map((payment) => {
+      return {
+        ...payment,
+        customer: new Types.ObjectId(payment.customer),
+      };
+    });
+    const addedPayments =  this.model.insertMany(payments);
+
+    return addedPayments
+  }
+
   filter(args: GetPaymentsFilterDto): IFilter {
     return {
       ...args.customer && { customer: new Types.ObjectId(args.customer) },
-      ...args.startDate && args.endDate && { date: { $gte: args.startDate, $lt: args.endDate } }
+      ...args.startDate && args.endDate && { date: { $gte: new Date(args.startDate), $lt: new Date(args.endDate) } },
+      ...args.searchTerm && {
+        $or: [
+          { invoiceNb: { $regex: args.searchTerm, $options: 'i' } },
+        ],
+      },
     }
   }
 
-  findAll(filters: IFilter) {
-    return this.model.find(filters).populate('customer')
+  async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+    const finalLimit = filters.pageSize || limit;
+
+    if (!filters.customer) {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        pages: 0,
+      };
+    }
+
+    const skip = (page - 1) * finalLimit;
+
+    const [receipts, total] = await Promise.all([
+      this.model.find(filters).limit(finalLimit).skip(skip).exec(),
+      this.model.countDocuments(filters),
+    ]);
+
+    return {
+      data: receipts,
+      total,
+      page,
+      pages: Math.ceil(total / finalLimit),
+    };
   }
+
 
   findOne(id: string) {
     return this.model.findById(id).populate('customer');

@@ -4,7 +4,9 @@ import {
     IsString,
     IsNumber,
     IsDateString,
+    IsEnum,
   } from 'class-validator';
+import { Currency } from 'src/common/types/enums';
   
   export class CreateCustomerPaymentDto {
     @IsMongoId()
@@ -29,10 +31,10 @@ import {
     @IsOptional()
     @IsNumber()
     cash?: number;
-  
+
+    @IsEnum(Currency)
     @IsOptional()
-    @IsString()
-    currency?: string;
+    currency?: Currency;
   
     @IsOptional()
     @IsString()

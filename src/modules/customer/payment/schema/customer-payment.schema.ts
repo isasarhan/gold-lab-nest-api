@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
+import { Currency } from 'src/common/types/enums';
+
 
 @Schema({ timestamps: true })
 export class Payment {
@@ -12,17 +14,18 @@ export class Payment {
   @Prop({ default: Date.now })
   date: Date;
 
-  @Prop()
+  @Prop({ default: 0 })
   weight: number;
 
-  @Prop()
+  @Prop({ default: 995 })
   karat: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   cash: number;
 
-  @Prop()
-  currency: string;
+    @Prop({ type: String, enum: Currency, default: Currency.Usd })
+  currency: Currency;
+  
 
   @Prop()
   description: string;
