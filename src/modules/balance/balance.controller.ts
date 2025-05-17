@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, Query } from '@nestjs/common';
 import { BalanceService } from './balance.service';
 import { CreateBalanceDto } from './dto/create.dto';
 import { UpdateBalanceDto } from './dto/update.dto';
+import { GetBalanceFilterDto } from './dto/getAll.dto';
 
 @Controller('balances')
 export class BalanceController {
@@ -13,8 +14,9 @@ export class BalanceController {
   }
 
   @Get()
-  findAll() {
-    return this.balanceService.findAll();
+  findAll(@Query() dto: GetBalanceFilterDto) {
+    const filter = this.balanceService.filter(dto);
+    return this.balanceService.findAll(filter);
   }
 
   @Get('total')
