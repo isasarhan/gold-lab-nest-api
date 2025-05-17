@@ -7,7 +7,7 @@ import { UpdateSupplierDto } from './dto/update.dto';
 export class SupplierController {
   constructor(private readonly service: SupplierService) {}
 
-  @Post()
+  @Post('add')
   create(@Body() dto: CreateSupplierDto) {
     return this.service.create(dto);
   }

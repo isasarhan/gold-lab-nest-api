@@ -9,7 +9,7 @@ import { UpdateSupplierDto } from './dto/update.dto';
 export class SupplierService {
   constructor(
     @InjectModel(Supplier.name) private readonly model: Model<Supplier>,
-  ) {}
+  ) { }
 
   create(dto: CreateSupplierDto) {
     return this.model.create(dto);
@@ -26,6 +26,15 @@ export class SupplierService {
   async update(id: string, dto: UpdateSupplierDto) {
     const updated = await this.model.findByIdAndUpdate(id, dto, { new: true });
     if (!updated) throw new NotFoundException('Supplier not found');
+    return updated;
+  }
+
+  async updateBalance(id: string, gold: number=0, cash: number=0) {
+    const supplier = await this.model.findById(id)
+    if (!supplier) throw new NotFoundException('Supplier not found');
+    const totalGold = supplier.gold + gold
+    const totalCash = supplier.cash + cash
+    const updated = await this.model.findByIdAndUpdate(id, { gold: totalGold, cash: totalCash }, { new: true });
     return updated;
   }
 

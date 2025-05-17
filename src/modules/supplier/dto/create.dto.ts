@@ -17,5 +17,8 @@ export class CreateSupplierDto {
     cash: number;
 
     @IsOptional()
+    phone?: string;
+    
+    @IsOptional()
     description?: string;
 }

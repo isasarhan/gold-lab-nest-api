@@ -1,7 +1,8 @@
-import { Controller, Post, Get, Param, Put, Delete, Body } from '@nestjs/common';
+import { Controller, Post, Get, Param, Put, Delete, Body, Query } from '@nestjs/common';
 import { SupplyService } from './supply.service';
 import { CreateSupplyDto } from './dto/create.dto';
 import { UpdateSupplyDto } from './dto/update.dto';
+import { GetSupplyFilterDto } from './dto/getAll.dto';
 
 @Controller('supplies')
 export class SupplyController {
@@ -11,10 +12,14 @@ export class SupplyController {
   create(@Body() dto: CreateSupplyDto) {
     return this.service.create(dto);
   }
-
+  @Post("add/bulk")
+  createMany(@Body() dto: CreateSupplyDto[]) {
+    return this.service.createMany(dto);
+  }
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query() args: GetSupplyFilterDto) {
+    const filters = this.service.filter(args)
+    return this.service.findAll(filters);
   }
 
   @Get(':id')

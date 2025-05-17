@@ -20,6 +20,7 @@ export enum ItemType {
 export enum Karat {
   K18 = '18K',
   K21 = '21K',
+  K24 = '24K',
 }
 
 @Schema({ timestamps: true })

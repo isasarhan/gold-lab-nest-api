@@ -7,6 +7,9 @@ export class CreateSupplyDto {
 
     @IsNumber()
     weight: number;
+    
+    @IsString()
+    invoiceNb: string;
 
     @IsEnum(Karat)
     @IsOptional()

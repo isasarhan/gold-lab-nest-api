@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CustomerService } from '../customer/customer.service';
 import { InvoiceService } from '../customer/invoice/invoice.service';
-import { CustomerPaymentService } from '../customer/payment/payment.service';
+import { CustomerPaymentService } from '../customer/receipts/payment.service';
 import { getAllYearMonths, getStartOfMonth, monthShort } from '../../utils/date-utilities';
 
 @Injectable()

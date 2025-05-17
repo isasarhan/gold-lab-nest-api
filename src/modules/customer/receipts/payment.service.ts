@@ -20,6 +20,7 @@ export class CustomerPaymentService {
   create(dto: CreateCustomerPaymentDto) {
     return this.model.create(dto);
   }
+  
   async createMany(dto: CreateCustomerPaymentDto[]) {
     const payments = dto.map((payment) => {
       return {

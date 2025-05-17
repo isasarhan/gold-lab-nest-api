@@ -7,7 +7,7 @@ import { SupplyModule } from './modules/supply/supply.module';
 import { SupplierModule } from './modules/supplier/supplier.module';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { InvoiceModule } from './modules/customer/invoice/invoice.module';
-import { CustomerPaymentModule } from './modules/customer/payment/payment.module';
+import { CustomerPaymentModule } from './modules/customer/receipts/payment.module';
 import { SupplyPaymentModule } from './modules/supply/supply-payment/supply-payment.module';
 import { OrderModule } from './modules/order/order.module';
 import { AnalyticModule } from './modules/analytic/analytic.module';

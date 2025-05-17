@@ -15,6 +15,9 @@ export class Supplier {
   cash: number;
 
   @Prop()
+  phone: string;
+
+  @Prop()
   description: string;
 }
 

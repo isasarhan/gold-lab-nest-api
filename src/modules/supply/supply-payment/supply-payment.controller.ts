@@ -6,11 +6,15 @@ import { GetPaymentsFilterDto } from './dto/getAll.dto';
 
 @Controller('supply-payments')
 export class SupplyPaymentController {
-  constructor(private readonly service: SupplyPaymentService) {}
+  constructor(private readonly service: SupplyPaymentService) { }
 
   @Post()
   create(@Body() dto: CreateSupplyPaymentDto) {
     return this.service.create(dto);
+  }
+  @Post("add/bulk")
+  createMany(@Body() dto: CreateSupplyPaymentDto[]) {
+    return this.service.createMany(dto);
   }
 
   @Get()

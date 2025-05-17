@@ -3,7 +3,7 @@ import { AnalyticController } from './analytic.controller';
 import { AnalyticService } from './analytic.service';
 import { CustomerModule } from '../customer/customer.module';
 import { InvoiceModule } from '../customer/invoice/invoice.module';
-import { CustomerPaymentModule } from '../customer/payment/payment.module';
+import { CustomerPaymentModule } from '../customer/receipts/payment.module';
 
 @Module({
   imports:[CustomerModule, InvoiceModule, CustomerPaymentModule],

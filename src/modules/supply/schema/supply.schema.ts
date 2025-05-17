@@ -22,6 +22,9 @@ export class Supply {
     @Prop()
     description: string;
 
+    @Prop()
+    invoiceNb: string;
+
     @Prop({ type: String, enum: ItemType, default: ItemType.Other })
     type: ItemType;
 }
