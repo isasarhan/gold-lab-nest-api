@@ -6,46 +6,46 @@ import { GetBalanceFilterDto } from './dto/getAll.dto';
 
 @Controller('balances')
 export class BalanceController {
-  constructor(private readonly balanceService: BalanceService) { }
+  constructor(private readonly service: BalanceService) { }
 
   @Post()
   create(@Body() dto: CreateBalanceDto) {
-    return this.balanceService.create(dto);
+    return this.service.create(dto);
   }
 
   @Get()
   findAll(@Query() dto: GetBalanceFilterDto) {
-    const filter = this.balanceService.filter(dto);
-    return this.balanceService.findAll(filter);
+    const filter = this.service.filter(dto);
+    return this.service.findAll(filter, dto.page, dto.pageSize);
   }
 
   @Get('total')
   getTotals() {
-    return this.balanceService.getTotal();
+    return this.service.getTotal();
   }
 
 
   @Get('customer/:id')
   findByCustomer(@Param('id') id: string) {
-    return this.balanceService.findByCustomer(id);
+    return this.service.findByCustomer(id);
   }
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.balanceService.findOne(id);
+    return this.service.findOne(id);
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() dto: UpdateBalanceDto) {
-    return this.balanceService.update(id, dto);
+    return this.service.update(id, dto);
   }
 
   @Put('customer/:id')
   updateByCustomer(@Param('id') id: string, @Body() dto: UpdateBalanceDto) {
-    return this.balanceService.updateByCustomer(id, dto.gold, dto.cash);
+    return this.service.updateByCustomer(id, dto.gold, dto.cash);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.balanceService.remove(id);
+    return this.service.remove(id);
   }
 }

@@ -19,7 +19,7 @@ export class SupplyController {
   @Get()
   findAll(@Query() args: GetSupplyFilterDto) {
     const filters = this.service.filter(args)
-    return this.service.findAll(filters);
+    return this.service.findAll(filters, args.page, args.pageSize);
   }
 
   @Get(':id')

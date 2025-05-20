@@ -25,7 +25,7 @@ export class EmployeeAttendenceController {
   @Get()
   findAll(@Query() args: GetAttendenceFilterDto) {
     const filters = this.service.filter(args)    
-    return this.service.findAll(filters);
+    return this.service.findAll(filters, args.page, args.pageSize);
   }
 
   @Get(':id')

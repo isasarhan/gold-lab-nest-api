@@ -20,7 +20,7 @@ export class SupplyPaymentController {
   @Get()
   findAll(@Query() args: GetPaymentsFilterDto) {
     const filters = this.service.filter(args)
-    return this.service.findAll(filters);
+    return this.service.findAll(filters, args.page, args.pageSize);
   }
 
   @Get(':id')
