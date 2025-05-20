@@ -28,32 +28,63 @@ export class BalanceService {
     return balance.save();
   }
 
-  filter(args: GetBalanceFilterDto): IFilter {
-    return {
-      ...args.searchTerm && {
+  filter(args: GetBalanceFilterDto): Record<string, any>[] {
+    const filters: any[] = [];
+
+    if (args.searchTerm?.trim()) {
+      filters.push({
         $or: [
-          { name: { $regex: args.searchTerm, $options: 'i' } },
-          { email: { $regex: args.searchTerm, $options: 'i' } },
-          { phone: { $regex: args.searchTerm, $options: 'i' } },
-        ],
-      },
+          { 'customer.name': { $regex: args.searchTerm.trim(), $options: 'i' } }
+        ]
+      });
     }
+
+    return filters;
   }
-  async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+  async findAll(filters: Record<string, any>[], page: number = 1, limit: number = 30) {
     const skip = (page - 1) * limit;
 
-    const [events, total] = await Promise.all([
-      this.model.find().limit(filters.pageSize || limit).skip(skip).populate('customer').exec(),
-      this.model.countDocuments(),
-    ]);
+    const pipeline: any[] = [
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customer',
+          foreignField: '_id',
+          as: 'customer'
+        }
+      },
+      {
+        $unwind: {
+          path: '$customer',
+          preserveNullAndEmptyArrays: false
+        }
+      },
+      ...(filters.length ? [{ $match: { $and: filters } }] : []),
+      {
+        $facet: {
+          data: [
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          totalCount: [
+            { $count: 'count' }
+          ]
+        }
+      }
+    ];
+
+    const result = await this.model.aggregate(pipeline).exec();
+    const data = result[0]?.data || [];
+    const total = result[0]?.totalCount[0]?.count || 0;
 
     return {
-      data: events,
+      data,
       total,
       page,
       pages: Math.ceil(total / limit),
     };
   }
+
 
   async findOne(id: string): Promise<BalanceDocument> {
 
