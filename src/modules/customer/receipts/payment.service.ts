@@ -20,7 +20,7 @@ export class CustomerPaymentService {
   create(dto: CreateCustomerPaymentDto) {
     return this.model.create(dto);
   }
-  
+
   async createMany(dto: CreateCustomerPaymentDto[]) {
     const payments = dto.map((payment) => {
       return {
@@ -97,22 +97,25 @@ export class CustomerPaymentService {
   }
 
   async aggregateKaserGoldRevenue(customerId: string | null, year: number) {
+    const start = new Date(Date.UTC(year, 0, 1));
+    const end = new Date(Date.UTC(year + 1, 0, 1));
     const match: any = {
-      createdAt: {
-        $gte: new Date(year, 0, 1),
-        $lt: new Date(year + 1, 0, 1),
+      date: {
+        $gte: start,
+        $lt: end,
       },
     };
-
     if (customerId) {
-      match.customer = customerId;
+      match.customer = new Types.ObjectId(customerId);
     }
+
+    console.log('match', match);
 
     return this.model.aggregate([
       { $match: match },
       {
         $group: {
-          _id: { $month: "$createdAt" },
+          _id: { $month: "$date" },
           totalCash: { $sum: "$cash" },
           totalWeight18k: {
             $sum: {

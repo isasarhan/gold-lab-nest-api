@@ -12,13 +12,13 @@ export class AnalyticService {
         private readonly customerPaymentService: CustomerPaymentService,
     ) { }
 
-    async getTotalYearRevenue(customerId: string | null, year: number) {
+    async getTotalYearRevenue(customerId: string | null, year: number = new Date().getFullYear()) {        
         try {
             if (customerId) {
                 await this.customerService.findOne(customerId);
             }
 
-            const aggregatedData = await this.invoiceService.aggregateYearlyRevenue(customerId, year);
+            const aggregatedData = await this.invoiceService.aggregateYearlyRevenue(customerId, year);            
 
             // Format to include all 12 months even if some are missing
             const revenues = monthShort.map((month, i) => {
@@ -36,7 +36,7 @@ export class AnalyticService {
         }
     }
 
-    async getCustomerInvoicesPerMonth(month: number, year: number) {
+    async getCustomerInvoicesPerMonth(month: number, year: number = new Date().getFullYear()) {
         try {
             const currentMonth = getStartOfMonth(year, month);
             const endOfMonth = new Date(year, month, 31, 23, 59, 59);
@@ -56,14 +56,15 @@ export class AnalyticService {
         }
     }
 
-    async getKaserGoldRevenue(customer: string, year: number) {
+    async getKaserGoldRevenue(customer: string, year: number = new Date().getFullYear()) {
         try {
             if (customer) {
                 await this.customerService.findOne(customer);
             }
 
-            const aggregated = await this.customerPaymentService.aggregateKaserGoldRevenue(customer, year);
-
+            const aggregated = await this.customerPaymentService.aggregateKaserGoldRevenue(customer, year);            
+            console.log('aggregated', aggregated);
+            
             const kaser = monthShort.map((month, index) => {
                 const record = aggregated.find(item => item._id === index + 1);
 

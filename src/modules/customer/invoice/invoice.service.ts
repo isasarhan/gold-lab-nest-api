@@ -18,7 +18,7 @@ export class InvoiceService {
     private balanceService: BalanceService,
   ) { }
 
-  async create(dto: CreateInvoiceDto) {    
+  async create(dto: CreateInvoiceDto) {
     const { orders, ...rest } = dto
     const orderResult = await this.orderService.createMany(dto.orders)
 
@@ -101,22 +101,24 @@ export class InvoiceService {
   }
 
   async aggregateYearlyRevenue(customerId: string | null, year: number) {
+    const start = new Date(Date.UTC(year, 0, 1));
+    const end = new Date(Date.UTC(year + 1, 0, 1));
     const match: any = {
-      createdAt: {
-        $gte: new Date(year, 0, 1),
-        $lt: new Date(year + 1, 0, 1),
+      date: {
+        $gte: start,
+        $lt: end,
       },
     };
 
     if (customerId) {
-      match.customer = customerId;
+      match.customer = new Types.ObjectId(customerId);
     }
 
     return this.model.aggregate([
       { $match: match },
       {
         $group: {
-          _id: { $month: "$createdAt" },
+          _id: { $month: "$date" },
           totalCash: { $sum: "$totalCash" },
           totalWeight: { $sum: "$totalWeight" },
         },
