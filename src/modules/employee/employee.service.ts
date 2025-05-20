@@ -52,9 +52,9 @@ export class EmployeeService {
     if (!employee) throw new NotFoundException('Employee not found');
     return employee;
   }
-  async findByPhone(phone: string){
+  async findByPhone(phone: string) {
     const employee = await this.model.findOne({ phone }).exec();
-    if (!employee) throw new NotFoundException('Employee not found');
+    if (!employee) throw new NotFoundException(`Employee not found with number ${phone}`);
     return employee;
   }
 

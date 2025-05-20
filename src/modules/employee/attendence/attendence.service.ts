@@ -59,15 +59,12 @@ export class EmployeeAttenndenceService {
             const { date, arrival, departure, phone } = row;
 
             const employee = await this.employeeService.findByPhone(phone)
-            if (!employee)
-                throw new NotFoundException('Employee not found');
-            const baseDate = excelDateToJSDate(date);
 
-            // Extract arrival and departure times as fractional values
-            const arrivalTime = excelDateToJSDate(arrival);  // Arrival time in JS Date format
-            const departureTime = excelDateToJSDate(departure);  // Departure time in JS Date format
+            const baseDate = excelDateToJSDate(date)
 
-            // Set the time for arrival and departure (keeping the base date)
+            const arrivalTime = excelDateToJSDate(arrival)
+            const departureTime = excelDateToJSDate(departure)
+
             const arrivalDateTime = new Date(baseDate.setHours(arrivalTime.getHours(), arrivalTime.getMinutes(), arrivalTime.getSeconds()));
             const departureDateTime = new Date(baseDate.setHours(departureTime.getHours(), departureTime.getMinutes(), departureTime.getSeconds()));
 
