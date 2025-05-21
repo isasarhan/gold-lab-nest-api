@@ -29,6 +29,11 @@ export class CustomerController {
     const filters = this.service.filter(args)
     return this.service.findAll(filters, args.page, args.pageSize);
   }
+  
+    @Get('types')
+    getCustomerTypeAnalytics() {
+      return this.service.getCustomerTypeAnalytics()
+    }
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Customer> {

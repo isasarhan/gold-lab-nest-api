@@ -23,9 +23,8 @@ export class Payment {
   @Prop({ default: 0 })
   cash: number;
 
-    @Prop({ type: String, enum: Currency, default: Currency.Usd })
+  @Prop({ type: String, enum: Currency, default: Currency.Usd })
   currency: Currency;
-  
 
   @Prop()
   description: string;
