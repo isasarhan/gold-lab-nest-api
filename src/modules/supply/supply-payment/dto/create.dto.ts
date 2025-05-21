@@ -26,9 +26,9 @@ import { Karat } from 'src/modules/order/schema/order.schema';
     @IsNumber()
     weight?: number;
   
-    @IsEnum(Karat)
     @IsOptional()
-    karat: Karat;
+    @IsNumber()
+    karat?: number;
   
     @IsOptional()
     @IsNumber()

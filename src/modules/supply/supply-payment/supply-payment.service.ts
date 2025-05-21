@@ -15,16 +15,6 @@ export class SupplyPaymentService {
     private supplierService: SupplierService,
   ) { }
 
-  getKaratValue = (karat: Karat) => {
-    switch (karat) {
-      case Karat.K18:
-        return 750
-      case Karat.K21:
-        return 875
-      case Karat.K24:
-        return 995
-    }
-  }
   create(dto: CreateSupplyPaymentDto) {
     return this.model.create(dto);
   }
@@ -38,7 +28,7 @@ export class SupplyPaymentService {
     const addedPayments = await this.model.insertMany(supplies);
     await Promise.all(
       addedPayments.map((payment) => {
-        const karat = this.getKaratValue(payment.karat)
+        const karat = payment.karat || 995
         this.supplierService.updateBalance(payment.supplier.toString(),
           -(payment?.weight! * karat) / 995, -(payment?.cash || 0))
       }))
@@ -89,7 +79,7 @@ export class SupplyPaymentService {
      const payment = await this.model.findById(id)
     if (!payment) throw new NotFoundException('Supply not found');
     
-    const karat = this.getKaratValue(payment.karat)
+    const karat = payment.karat
     this.supplierService.updateBalance(payment.supplier.toString(),
           (payment?.weight! * karat) / 995, (payment.cash))
           

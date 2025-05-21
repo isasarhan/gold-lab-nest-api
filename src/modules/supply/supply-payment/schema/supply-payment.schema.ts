@@ -18,8 +18,8 @@ export class SupplyPayment {
     @Prop()
     weight: number;
 
-    @Prop({ type: String, enum: Karat, default: Karat.K18 })
-    karat: Karat;
+    @Prop()
+    karat: number;
 
     @Prop()
     cash: number;
