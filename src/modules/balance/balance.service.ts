@@ -52,7 +52,7 @@ export class BalanceService {
 
     return filters;
   }
-  async findAll(sort: Record<string, 1 | -1>, filters: Record<string, any>[], page: number = 1, limit: number = 30) {
+  async findAll(sort: Record<string, 1 | -1>, filters: Record<string, any>[], page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
 
     const pipeline: any[] = [

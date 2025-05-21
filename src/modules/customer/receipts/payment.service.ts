@@ -50,7 +50,7 @@ export class CustomerPaymentService {
     }
   }
 
-  async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+  async findAll(filters: IFilter, page: number = 1, limit: number = 20) {
     const finalLimit = filters.pageSize || limit;
 
     if (!filters.customer) {

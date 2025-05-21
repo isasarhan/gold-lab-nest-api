@@ -37,7 +37,7 @@ export class CustomerService {
       },
     }
   }
-  async findAll(filters: IFilter, page: number = 1, limit: number = 30) {
+  async findAll(filters: IFilter, page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
 
     const [events, total] = await Promise.all([
