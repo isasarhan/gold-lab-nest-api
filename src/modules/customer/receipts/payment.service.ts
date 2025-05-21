@@ -109,8 +109,6 @@ export class CustomerPaymentService {
       match.customer = new Types.ObjectId(customerId);
     }
 
-    console.log('match', match);
-
     return this.model.aggregate([
       { $match: match },
       {

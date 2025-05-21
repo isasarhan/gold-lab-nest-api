@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmployeeModule } from './modules/employee/employee.module';
@@ -19,6 +19,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { EmployeeAttenndenceModule } from './modules/employee/attendence/attendence.module';
+import { AuthMiddleware } from './common/middlewares/auth.middleware';
 
 @Module({
   imports:
@@ -32,4 +33,14 @@ import { EmployeeAttenndenceModule } from './modules/employee/attendence/attende
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthMiddleware)
+      .exclude(
+        { path: 'auth', method: RequestMethod.ALL },
+        { path: 'auth/(.*)', method: RequestMethod.ALL }
+      )
+      .forRoutes({ path: '*', method: RequestMethod.ALL })
+  }
+}

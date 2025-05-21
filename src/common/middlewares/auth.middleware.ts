@@ -20,10 +20,14 @@ export class AuthMiddleware implements NestMiddleware {
         if (!jwtSecret)
             throw new Error('JWT_SECRET is not set in the environment variables');
 
-        const decoded = jwt.verify(token, jwtSecret) as IToken
-        const user = await this.usersService.findById(decoded?.userId)
-        req.user = user        
-        next()
+        try {
+            const decoded = jwt.verify(token, jwtSecret) as IToken
+            const user = await this.usersService.findById(decoded?.userId)
+            req.user = user        
+            next()
+        } catch (e) {
+            throw new UnauthorizedException(e.message)
+        }
     }
 
 }

@@ -63,7 +63,6 @@ export class AnalyticService {
             }
 
             const aggregated = await this.customerPaymentService.aggregateKaserGoldRevenue(customer, year);            
-            console.log('aggregated', aggregated);
             
             const kaser = monthShort.map((month, index) => {
                 const record = aggregated.find(item => item._id === index + 1);
