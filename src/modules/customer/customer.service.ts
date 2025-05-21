@@ -41,7 +41,7 @@ export class CustomerService {
     const skip = (page - 1) * limit;
 
     const [events, total] = await Promise.all([
-      this.model.find(filters).limit(filters.pageSize || limit).skip(skip).exec(),
+      this.model.find(filters).find(filters).sort({ name: 1 }).limit(filters.pageSize || limit).skip(skip).exec(),
       this.model.countDocuments(),
     ]);
 

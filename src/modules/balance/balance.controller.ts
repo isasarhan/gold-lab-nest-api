@@ -15,8 +15,9 @@ export class BalanceController {
 
   @Get()
   findAll(@Query() dto: GetBalanceFilterDto) {
+    const sort = this.service.sort(dto.sort);
     const filter = this.service.filter(dto);
-    return this.service.findAll(filter, dto.page, dto.pageSize);
+    return this.service.findAll(sort, filter, dto.page, dto.pageSize);
   }
 
   @Get('total')

@@ -5,7 +5,7 @@ import { Balance, BalanceDocument } from './schema/balance.schema';
 import { CreateBalanceDto } from './dto/create.dto';
 import { UpdateBalanceDto } from './dto/update.dto';
 import { CustomerService } from '../customer/customer.service';
-import { GetBalanceFilterDto } from './dto/getAll.dto';
+import { BalancessSort, GetBalanceFilterDto } from './dto/getAll.dto';
 import { IFilter } from 'src/common/types/filter';
 
 @Injectable()
@@ -28,6 +28,17 @@ export class BalanceService {
     return balance.save();
   }
 
+  sort(sort?: BalancessSort): Record<string, 1 | -1> {
+    const sortObject: Record<string, Record<string, 1 | -1>> = {
+      HighestGold: { gold: -1 },
+      HighestCash: { cash: -1 },
+      LowestGold: { gold: 1 },
+      LowestCash: { cash: 1 },
+    }
+
+    return sortObject[sort ?? 'HighestGold']
+  }
+
   filter(args: GetBalanceFilterDto): Record<string, any>[] {
     const filters: any[] = [];
 
@@ -41,7 +52,7 @@ export class BalanceService {
 
     return filters;
   }
-  async findAll(filters: Record<string, any>[], page: number = 1, limit: number = 30) {
+  async findAll(sort: Record<string, 1 | -1>, filters: Record<string, any>[], page: number = 1, limit: number = 30) {
     const skip = (page - 1) * limit;
 
     const pipeline: any[] = [
@@ -63,6 +74,7 @@ export class BalanceService {
       {
         $facet: {
           data: [
+            { $sort: sort },
             { $skip: skip },
             { $limit: limit }
           ],

@@ -1,25 +1,25 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Types } from 'mongoose';
+  import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+  import { HydratedDocument, Types } from 'mongoose';
 
-@Schema({ timestamps: true })
-export class Invoice {
-  @Prop()
-  invoiceNb: string;
+  @Schema({ timestamps: true })
+  export class Invoice {
+    @Prop()
+    invoiceNb: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Customer', required: true })
-  customer: Types.ObjectId;
+    @Prop({ type: Types.ObjectId, ref: 'Customer', required: true })
+    customer: Types.ObjectId;
 
-  @Prop({ type: [Types.ObjectId], ref: 'Order', required: true })
-  orders: Types.ObjectId[];
+    @Prop({ type: [Types.ObjectId], ref: 'Order', required: true })
+    orders: Types.ObjectId[];
 
-  @Prop({ default: 0 })
-  totalWeight: number;
+    @Prop({ default: 0 })
+    totalWeight: number;
 
-  @Prop({ default: 0 })
-  totalCash: number;
+    @Prop({ default: 0 })
+    totalCash: number;
 
-  @Prop({ default: Date.now })
-  date: Date;
+    @Prop({ default: Date.now })
+    date: Date;
 }
 export type InvoiceDocument = HydratedDocument<Invoice>;
 
