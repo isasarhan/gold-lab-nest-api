@@ -25,15 +25,15 @@ export class CustomerController {
   }
 
   @Get()
-  findAll(@Query() args: GetCustomerFilterDto) {    
+  findAll(@Query() args: GetCustomerFilterDto) {
     const filters = this.service.filter(args)
     return this.service.findAll(filters, args.page, args.pageSize);
   }
-  
-    @Get('types')
-    getCustomerTypeAnalytics() {
-      return this.service.getCustomerTypeAnalytics()
-    }
+
+  @Get('types')
+  getCustomerTypeAnalytics() {
+    return this.service.getCustomerTypeAnalytics()
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Customer> {
