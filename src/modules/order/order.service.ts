@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { Order } from './schema/order.schema';
 import { CreateOrderDto } from './dto/create.dto';
 import { UpdateOrderDto } from './dto/update.dto';
-import { InvoiceService } from '../customer/invoice/invoice.service';
+import { InvoiceService } from '../invoice/invoice.service';
 import { parseKarat } from 'src/utils';
 
 @Injectable()

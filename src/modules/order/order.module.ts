@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { OrderService } from './order.service';
 import { OrderController } from './order.controller';
 import { Order, OrderSchema } from './schema/order.schema';
-import { InvoiceModule } from '../customer/invoice/invoice.module';
+import { InvoiceModule } from '../invoice/invoice.module';
 
 @Module({
   imports: [forwardRef(() =>InvoiceModule), MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }])],
