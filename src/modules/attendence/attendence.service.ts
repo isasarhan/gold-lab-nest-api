@@ -5,10 +5,10 @@ import { EmployeeAttendence } from './schema/employee-attendence.schema';
 import { CreateEmployeeAttendenceDto } from './dto/create.dto';
 import { UpdateEmployeeAttendenceDto } from './dto/update.dto';
 import * as XLSX from 'xlsx';
-import { EmployeeService } from '../employee.service';
 import { dateFormatter, excelDateToJSDate } from 'src/utils/date-utilities';
 import { IFilter } from 'src/common/types/filter';
 import { GetAttendenceFilterDto } from './dto/getAll.dto';
+import { EmployeeService } from '../employee/employee.service';
 
 @Injectable()
 export class EmployeeAttenndenceService {

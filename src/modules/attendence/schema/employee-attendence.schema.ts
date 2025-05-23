@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { Employee } from '../../schema/employee.schema';
+import { Employee } from 'src/modules/employee/schema/employee.schema';
 
 @Schema({ timestamps: true })
 export class EmployeeAttendence {

@@ -18,9 +18,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
-import { EmployeeAttenndenceModule } from './modules/employee/attendence/attendence.module';
 import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { DailyWorkflowModule } from './modules/daily-workflow/daily-workflow.module';
+import { EmployeeAttenndenceModule } from './modules/attendence/attendence.module';
+import { SalaryPaymentModule } from './modules/salary-payment/salary-payment.module';
 
 @Module({
   imports:
@@ -29,7 +30,7 @@ import { DailyWorkflowModule } from './modules/daily-workflow/daily-workflow.mod
       load: [configuration],
     }),
     MongooseModule.forRoot(`${process.env.DATABASE_HOST}`),
-      AuthModule, EmployeeAttenndenceModule, UserModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
+      AuthModule,  SalaryPaymentModule,EmployeeAttenndenceModule, UserModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
       SupplyPaymentModule, InvoiceModule, InventoryModule, SupplierModule, SupplyModule, SettingModule, EmployeeModule, CustomerPaymentModule, DailyWorkflowModule],
   controllers: [AppController],
   providers: [AppService],

@@ -33,7 +33,7 @@ export class CreateDailyWorkflowDto {
     @IsDate()
     @Transform(({ value }) => new Date(value))
     @IsNotEmpty()
-    date?: Date
+    date: Date
 
     @IsArray()
     @IsNotEmpty()

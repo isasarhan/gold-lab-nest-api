@@ -13,7 +13,7 @@ export class EmployeeService {
     @InjectModel(Employee.name) private readonly model: Model<Employee>,
   ) { }
 
-  async create(dto: CreateEmployeeDto): Promise<Employee> {
+  async create(dto: CreateEmployeeDto) {
     const employee = new this.model(dto);
     return employee.save();
   }
@@ -47,7 +47,7 @@ export class EmployeeService {
     };
   }
 
-  async findOne(id: string): Promise<Employee> {
+  async findOne(id: string) {
     const employee = await this.model.findById(id).exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return employee;
@@ -58,7 +58,7 @@ export class EmployeeService {
     return employee;
   }
 
-  async update(id: string, dto: UpdateEmployeeDto): Promise<Employee> {
+  async update(id: string, dto: UpdateEmployeeDto) {
     const employee = await this.model.findByIdAndUpdate(id, dto, { new: true }).exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return employee;
