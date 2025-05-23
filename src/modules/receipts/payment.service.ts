@@ -21,6 +21,10 @@ export class CustomerPaymentService {
     return this.model.create(dto);
   }
 
+  parseWeight(weight: number=0, karat: number=995) {
+    if (karat === 995) return weight
+    return ((weight * karat) / 1000)
+  }
   async createMany(dto: CreateCustomerPaymentDto[]) {
     const payments = dto.map((payment) => {
       return {
@@ -32,7 +36,7 @@ export class CustomerPaymentService {
     await Promise.all(
       addedPayments.map((payment) => {
         this.balanceService.updateByCustomer(payment.customer.toString(),
-          -(payment?.weight! * payment.karat!) / 1000, -payment.cash!)
+          -this.parseWeight(payment?.weight, payment.karat), -payment.cash!)
       }))
 
     return addedPayments
@@ -92,7 +96,7 @@ export class CustomerPaymentService {
     const receipt = await this.model.findById(id)
     if (!receipt)
       throw new NotFoundException('receipt not found!')
-    this.balanceService.updateByCustomer(receipt.customer.toString(), -(receipt?.weight! * receipt.karat!) / 1000, -receipt.cash!)
+    this.balanceService.updateByCustomer(receipt.customer.toString(), this.parseWeight(receipt?.weight! , receipt.karat!), receipt.cash!)
     return await this.model.findByIdAndDelete(id);
   }
 

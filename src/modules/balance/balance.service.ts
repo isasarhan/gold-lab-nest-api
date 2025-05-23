@@ -155,7 +155,10 @@ export class BalanceService {
     if (!customer)
       throw new NotFoundException('Customer Not Found!');
 
-    const balance = await this.model.findByIdAndUpdate(id, dto, { new: true }).exec();
+    const balance = await this.model.findByIdAndUpdate(id, {
+      ...dto,
+      customer: new Types.ObjectId(dto.customer)
+    }, { new: true }).exec();
     if (!balance) throw new NotFoundException('Balance not found');
     return balance;
   }
@@ -186,6 +189,7 @@ export class BalanceService {
 
       return updatedBalance;
     } catch (error) {
+      console.error(error.message);
       throw new InternalServerErrorException('Unable to update balance');
     }
   }
