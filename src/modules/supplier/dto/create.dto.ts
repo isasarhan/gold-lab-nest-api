@@ -6,7 +6,7 @@ export class CreateSupplierDto {
     
     @IsNumber()
     @IsOptional()
-    gold: number;
+    weight: number;
     
     @IsNumber()
     @IsOptional()

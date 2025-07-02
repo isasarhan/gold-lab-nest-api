@@ -7,7 +7,6 @@ import { UpdateInvoiceDto } from './dto/update.dto';
 import { IFilter } from 'src/common/types/filter';
 import { GetInvoicesFilterDto } from './dto/getAll.dto';
 import { OrderService } from 'src/modules/order/order.service';
-import { Karat } from 'src/modules/order/schema/order.schema';
 import { parseKarat } from 'src/utils';
 import { BalanceService } from 'src/modules/balance/balance.service';
 

@@ -32,7 +32,7 @@ export class SupplierService {
   async updateBalance(id: string, gold: number=0, cash: number=0) {
     const supplier = await this.model.findById(id)
     if (!supplier) throw new NotFoundException('Supplier not found');
-    const totalGold = supplier.gold + gold
+    const totalGold = supplier.weight + gold
     const totalCash = supplier.cash + cash
     const updated = await this.model.findByIdAndUpdate(id, { gold: totalGold, cash: totalCash }, { new: true });
     return updated;

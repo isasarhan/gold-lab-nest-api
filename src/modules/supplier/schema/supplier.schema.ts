@@ -6,7 +6,7 @@ export class Supplier {
   name: string;
 
   @Prop({ default: 0 })
-  gold: number;
+  weight: number;
   
   @Prop({ default: 0 })
   silver: number;
