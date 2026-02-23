@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { SupplyPayment } from './schema/supply-payment.schema';
+import { escapeRegex } from 'src/utils/escape-regex';
 import { Model, Types } from 'mongoose';
 import { CreateSupplyPaymentDto } from './dto/create.dto';
 import { UpdateSupplyPaymentDto } from './dto/update.dto';
@@ -41,7 +42,7 @@ export class SupplyPaymentService {
       ...args.startDate && args.endDate && { date: { $gte: new Date(args.startDate), $lt: new Date(args.endDate) } },
       ...args.searchTerm && {
         $or: [
-          { invoiceNb: { $regex: args.searchTerm, $options: 'i' } },
+          { invoiceNb: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
         ],
       },
     }

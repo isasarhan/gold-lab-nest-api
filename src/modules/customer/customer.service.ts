@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { escapeRegex } from 'src/utils/escape-regex';
 
 import { Customer } from './schema/customer.schema';
 import { CreateCustomerDto } from './dto/create.dto';
@@ -19,20 +20,20 @@ export class CustomerService {
   async create(createCustomerDto: CreateCustomerDto) {
     const createdCustomer = new this.model(createCustomerDto);
     const customer = await createdCustomer.save();
-    this.balanceService.create({ customer: createdCustomer._id.toString() })
+    await this.balanceService.create({ customer: createdCustomer._id.toString() })
     return customer
   }
 
   filter(args: GetCustomerFilterDto): IFilter {
     return {
       ...args.name && { name: args.name },
-      ...args.email && { email: args.name },
-      ...args.phone && { phone: args.name },
+      ...args.email && { email: args.email },
+      ...args.phone && { phone: args.phone },
       ...args.searchTerm && {
         $or: [
-          { name: { $regex: args.searchTerm, $options: 'i' } },
-          { email: { $regex: args.searchTerm, $options: 'i' } },
-          { phone: { $regex: args.searchTerm, $options: 'i' } },
+          { name: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
+          { email: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
+          { phone: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
         ],
       },
     }

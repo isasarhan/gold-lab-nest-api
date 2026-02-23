@@ -17,7 +17,7 @@ export class AuthService {
             throw new NotFoundException('User not found')
         }
 
-        const isPasswordValid = user.matchPassword(password)
+        const isPasswordValid = await user.matchPassword(password)
 
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials')
@@ -30,6 +30,8 @@ export class AuthService {
 
     private generateJwtToken(userId: string): string {
         const payload = { userId }
-        return jwt.sign(payload, process.env.JWT_SECRET || 'mysecretjwtkey2648', { expiresIn: '1d' })
+        const secret = process.env.JWT_SECRET
+        if (!secret) throw new Error('JWT_SECRET environment variable is not configured')
+        return jwt.sign(payload, secret, { expiresIn: '1d' })
     }
 }

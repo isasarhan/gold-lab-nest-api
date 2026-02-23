@@ -1,6 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User } from './schema/user.schema';
+import { escapeRegex } from 'src/utils/escape-regex';
 import { Model, ObjectId, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create.dto';
 import { UpdateUserDto } from './dto/update.dto';
@@ -47,9 +48,9 @@ export class UserService {
             ...args.email && { email: args.email },
             ...args.searchTerm && {
                 $or: [
-                    { name: { $regex: args.searchTerm, $options: 'i' } },
-                    { phone: { $regex: args.searchTerm, $options: 'i' } },
-                    { email: { $regex: args.searchTerm, $options: 'i' } },
+                    { name: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
+                    { phone: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
+                    { email: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
                 ],
             },
         }

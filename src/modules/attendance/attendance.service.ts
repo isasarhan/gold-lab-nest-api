@@ -1,39 +1,39 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { EmployeeAttendence } from './schema/employee-attendence.schema';
-import { CreateEmployeeAttendenceDto } from './dto/create.dto';
-import { UpdateEmployeeAttendenceDto } from './dto/update.dto';
+import { EmployeeAttendance } from './schema/employee-attendance.schema';
+import { CreateEmployeeAttendanceDto } from './dto/create.dto';
+import { UpdateEmployeeAttendanceDto } from './dto/update.dto';
 import * as XLSX from 'xlsx';
 import { dateFormatter, excelDateToJSDate } from 'src/utils/date-utilities';
 import { IFilter } from 'src/common/types/filter';
-import { GetAttendenceFilterDto } from './dto/getAll.dto';
+import { GetAttendanceFilterDto } from './dto/getAll.dto';
 import { EmployeeService } from '../employee/employee.service';
 
 @Injectable()
-export class EmployeeAttenndenceService {
+export class EmployeeAttendanceService {
     constructor(
-        @InjectModel(EmployeeAttendence.name) private readonly model: Model<EmployeeAttendence>,
+        @InjectModel(EmployeeAttendance.name) private readonly model: Model<EmployeeAttendance>,
         private employeeService: EmployeeService,
     ) { }
 
-    async create(dto: CreateEmployeeAttendenceDto): Promise<EmployeeAttendence> {
-        const employeeAttenndence = new this.model(dto);
-        return employeeAttenndence.save();
+    async create(dto: CreateEmployeeAttendanceDto): Promise<EmployeeAttendance> {
+        const employeeAttendance = new this.model(dto);
+        return employeeAttendance.save();
     }
 
-    async createMany(dto: CreateEmployeeAttendenceDto[]) {
+    async createMany(dto: CreateEmployeeAttendanceDto[]) {
 
         const attendances = await Promise.all(
-            dto.map(async (attendence) => {
-                const employee = await this.employeeService.findOne(attendence.employee);
+            dto.map(async (attendance) => {
+                const employee = await this.employeeService.findOne(attendance.employee);
                 if (employee) {
                     return {
-                        ...attendence,
-                        employee: new Types.ObjectId(attendence.employee),
+                        ...attendance,
+                        employee: new Types.ObjectId(attendance.employee),
                     };
                 } else {
-                    console.warn(`Employee not found: ${attendence.employee}`);
+                    console.warn(`Employee not found: ${attendance.employee}`);
                     return null;
                 }
             }),
@@ -44,7 +44,7 @@ export class EmployeeAttenndenceService {
         return this.model.insertMany(validAttendances);
     }
 
-    async parseUploadedAttendence(file: Express.Multer.File) {
+    async parseUploadedAttendance(file: Express.Multer.File) {
         const workbook = XLSX.read(file.buffer, { type: 'buffer' });
 
         const worksheets = workbook.SheetNames.map(sheetName => {
@@ -79,7 +79,7 @@ export class EmployeeAttenndenceService {
 
     }
 
-    filter(args: GetAttendenceFilterDto): IFilter {
+    filter(args: GetAttendanceFilterDto): IFilter {
         const filter: IFilter = {};
 
         if (args.employee) {
@@ -125,13 +125,13 @@ export class EmployeeAttenndenceService {
 
         const skip = (page - 1) * finalLimit;
 
-        const [attendences, total] = await Promise.all([
+        const [attendances, total] = await Promise.all([
             this.model.find(filters).limit(finalLimit).skip(skip).exec(),
             this.model.countDocuments(filters),
         ]);
 
         return {
-            data: attendences.map((entry) => {
+            data: attendances.map((entry) => {
                 const date = new Date(entry.arrival)
                 const departureDate = new Date(entry.departure)
                 return {
@@ -146,20 +146,20 @@ export class EmployeeAttenndenceService {
         };
     }
 
-    async findOne(id: string): Promise<EmployeeAttendence> {
-        const EmployeeAttenndence = await this.model.findById(id).exec();
-        if (!EmployeeAttenndence) throw new NotFoundException('EmployeeAttenndence not found');
-        return EmployeeAttenndence;
+    async findOne(id: string): Promise<EmployeeAttendance> {
+        const employeeAttendance = await this.model.findById(id).exec();
+        if (!employeeAttendance) throw new NotFoundException('EmployeeAttendance not found');
+        return employeeAttendance;
     }
 
-    async update(id: string, dto: UpdateEmployeeAttendenceDto): Promise<EmployeeAttendence> {
-        const employeeAttenndence = await this.model.findByIdAndUpdate(id, dto, { new: true }).exec();
-        if (!employeeAttenndence) throw new NotFoundException('Employee attenndence not found');
-        return employeeAttenndence;
+    async update(id: string, dto: UpdateEmployeeAttendanceDto): Promise<EmployeeAttendance> {
+        const employeeAttendance = await this.model.findByIdAndUpdate(id, dto, { new: true }).exec();
+        if (!employeeAttendance) throw new NotFoundException('Employee attendance not found');
+        return employeeAttendance;
     }
 
     async remove(id: string): Promise<void> {
         const result = await this.model.findByIdAndDelete(id).exec();
-        if (!result) throw new NotFoundException('Employee attenndence not found');
+        if (!result) throw new NotFoundException('Employee attendance not found');
     }
 }

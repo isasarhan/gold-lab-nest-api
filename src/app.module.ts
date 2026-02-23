@@ -20,7 +20,7 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { DailyWorkflowModule } from './modules/daily-workflow/daily-workflow.module';
-import { EmployeeAttenndenceModule } from './modules/attendence/attendence.module';
+import { EmployeeAttendanceModule } from './modules/attendance/attendance.module';
 import { SalaryPaymentModule } from './modules/salary-payment/salary-payment.module';
 
 @Module({
@@ -30,7 +30,7 @@ import { SalaryPaymentModule } from './modules/salary-payment/salary-payment.mod
       load: [configuration],
     }),
     MongooseModule.forRoot(`${process.env.DATABASE_HOST}`),
-      AuthModule,  SalaryPaymentModule,EmployeeAttenndenceModule, UserModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
+      AuthModule,  SalaryPaymentModule, EmployeeAttendanceModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
       SupplyPaymentModule, InvoiceModule, InventoryModule, SupplierModule, SupplyModule, SettingModule, EmployeeModule, CustomerPaymentModule, DailyWorkflowModule],
   controllers: [AppController],
   providers: [AppService],

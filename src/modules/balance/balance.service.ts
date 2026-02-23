@@ -1,6 +1,7 @@
 import { forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId, Types } from 'mongoose';
+import { escapeRegex } from 'src/utils/escape-regex';
 import { Balance, BalanceDocument } from './schema/balance.schema';
 import { CreateBalanceDto } from './dto/create.dto';
 import { UpdateBalanceDto } from './dto/update.dto';
@@ -45,7 +46,7 @@ export class BalanceService {
     if (args.searchTerm?.trim()) {
       filters.push({
         $or: [
-          { 'customer.name': { $regex: args.searchTerm.trim(), $options: 'i' } }
+          { 'customer.name': { $regex: escapeRegex(args.searchTerm.trim()), $options: 'i' } }
         ]
       });
     }

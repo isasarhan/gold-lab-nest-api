@@ -1,7 +1,8 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+import { forwardRef, Inject, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Invoice } from './schema/invoice.schema';
-import { Model, Types } from 'mongoose';
+import { Connection, Model, Types } from 'mongoose';
+import { escapeRegex } from 'src/utils/escape-regex';
 import { CreateInvoiceDto } from './dto/create.dto';
 import { UpdateInvoiceDto } from './dto/update.dto';
 import { IFilter } from 'src/common/types/filter';
@@ -12,7 +13,9 @@ import { BalanceService } from 'src/modules/balance/balance.service';
 
 @Injectable()
 export class InvoiceService {
-  constructor(@InjectModel(Invoice.name) private model: Model<Invoice>,
+  constructor(
+    @InjectModel(Invoice.name) private model: Model<Invoice>,
+    @InjectConnection() private connection: Connection,
     @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
     private balanceService: BalanceService,
   ) { }
@@ -30,8 +33,25 @@ export class InvoiceService {
       totalCash += order.weight * order.perGram + (order.perItem * order.quantity);
       totalWeight += order.weight * parseKarat(order.karat) / 995;
     })
-    await this.balanceService.updateByCustomer(dto.customer.toString(), totalWeight, totalCash)
-    return this.model.create({ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer), totalCash, totalWeight });
+
+    const session = await this.connection.startSession()
+    try {
+      let invoice: any
+      await session.withTransaction(async () => {
+        await this.balanceService.updateByCustomer(dto.customer.toString(), totalWeight, totalCash)
+        const [created] = await this.model.create(
+          [{ ...rest, orders: ordersIds, customer: new Types.ObjectId(dto.customer), totalCash, totalWeight }],
+          { session },
+        )
+        invoice = created
+      })
+      return invoice
+    } catch (error) {
+      await Promise.all(ordersIds.map(id => this.orderService.remove(id.toString())))
+      throw new InternalServerErrorException('Failed to create invoice')
+    } finally {
+      await session.endSession()
+    }
   }
 
   filter(args: GetInvoicesFilterDto): IFilter {
@@ -40,7 +60,7 @@ export class InvoiceService {
       ...args.startDate && args.endDate && { date: { $gte: new Date(args.startDate), $lt: new Date(args.endDate) } },
       ...args.searchTerm && {
         $or: [
-          { invoiceNb: { $regex: args.searchTerm, $options: 'i' } },
+          { invoiceNb: { $regex: escapeRegex(args.searchTerm), $options: 'i' } },
         ],
       },
     }
@@ -89,14 +109,20 @@ export class InvoiceService {
     if (!invoice)
       throw new NotFoundException('invoice not found!')
 
-    await Promise.all(
-      invoice.orders.map((order) =>
-        this.orderService.remove(order._id.toString())
-      )
-    );
-    await this.balanceService.updateByCustomer(invoice.customer.toString(), -invoice.totalWeight, -invoice.totalCash)
-
-    return await this.model.findByIdAndDelete(id);
+    const session = await this.connection.startSession()
+    try {
+      await session.withTransaction(async () => {
+        await Promise.all(
+          invoice.orders.map((order) =>
+            this.orderService.remove(order._id.toString())
+          )
+        )
+        await this.balanceService.updateByCustomer(invoice.customer.toString(), -invoice.totalWeight, -invoice.totalCash)
+        await this.model.findByIdAndDelete(id, { session })
+      })
+    } finally {
+      await session.endSession()
+    }
   }
 
   async aggregateYearlyRevenue(customerId: string | null, year: number) {

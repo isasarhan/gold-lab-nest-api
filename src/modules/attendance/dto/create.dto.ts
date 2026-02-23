@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsString, IsNumber, IsEmail, IsNotEmpty, IsMongoId, IsDate } from 'class-validator';
 
-export class CreateEmployeeAttendenceDto {
+export class CreateEmployeeAttendanceDto {
   @IsNotEmpty()
   @IsMongoId()
   employee: string;

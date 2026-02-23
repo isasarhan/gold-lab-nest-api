@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 import { Employee } from 'src/modules/employee/schema/employee.schema';
 
 @Schema({ timestamps: true })
-export class EmployeeAttendence {
+export class EmployeeAttendance {
     @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
     employee: Types.ObjectId | Employee;
 
@@ -15,4 +15,4 @@ export class EmployeeAttendence {
 
 }
 
-export const EmployeeAttendenceSchema = SchemaFactory.createForClass(EmployeeAttendence);
+export const EmployeeAttendanceSchema = SchemaFactory.createForClass(EmployeeAttendance);
