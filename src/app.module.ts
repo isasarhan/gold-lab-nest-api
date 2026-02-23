@@ -1,6 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { RolesGuard } from './common/guards/roles.guard';
 import { EmployeeModule } from './modules/employee/employee.module';
 import { SettingModule } from './modules/setting/setting.module';
 import { SupplyModule } from './modules/supply/supply.module';
@@ -33,7 +35,7 @@ import { SalaryPaymentModule } from './modules/salary-payment/salary-payment.mod
       AuthModule,  SalaryPaymentModule, EmployeeAttendanceModule, UserModule, CustomerModule, BalanceModule, AnalyticModule, OrderModule,
       SupplyPaymentModule, InvoiceModule, InventoryModule, SupplierModule, SupplyModule, SettingModule, EmployeeModule, CustomerPaymentModule, DailyWorkflowModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, { provide: APP_GUARD, useClass: RolesGuard }],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

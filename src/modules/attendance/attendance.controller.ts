@@ -4,12 +4,15 @@ import { CreateEmployeeAttendanceDto } from './dto/create.dto';
 import { UpdateEmployeeAttendanceDto } from './dto/update.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GetAttendanceFilterDto } from './dto/getAll.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from '../user/schema/user.schema';
 
 @Controller('attendances')
 export class EmployeeAttendanceController {
   constructor(private readonly service: EmployeeAttendanceService) { }
 
   @Post('upload')
+  @Roles(Role.Admin, Role.Manager)
   @UseInterceptors(FileInterceptor('file'))
   uploadAttendanceXlsx(
     @UploadedFile() file: Express.Multer.File,
@@ -18,6 +21,7 @@ export class EmployeeAttendanceController {
   }
 
   @Post()
+  @Roles(Role.Admin, Role.Manager)
   create(@Body() dto: CreateEmployeeAttendanceDto) {
     return this.service.create(dto);
   }
@@ -34,11 +38,13 @@ export class EmployeeAttendanceController {
   }
 
   @Put(':id')
+  @Roles(Role.Admin, Role.Manager)
   update(@Param('id') id: string, @Body() dto: UpdateEmployeeAttendanceDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
+  @Roles(Role.Admin, Role.Manager)
   remove(@Param('id') id: string) {
     return this.service.remove(id);
   }

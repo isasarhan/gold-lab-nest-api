@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
-import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from './schema/user.schema';
 import { UpdateUserDto } from './dto/update.dto';
 import { GetUserDto } from './dto/getOne.dto';
 import { CreateUserDto } from './dto/create.dto';
 import { GetUsersFilterDto } from './dto/getAll.dto';
 import { UserService } from './user.service';
 
-@UseGuards(RolesGuard)
+@Roles(Role.Admin)
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) { }

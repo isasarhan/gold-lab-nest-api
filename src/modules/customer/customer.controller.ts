@@ -13,6 +13,8 @@ import { Customer } from './schema/customer.schema';
 import { CreateCustomerDto } from './dto/create.dto';
 import { UpdateCustomerDto } from './dto/update.dto';
 import { GetCustomerFilterDto } from './dto/getAll.dto';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { Role } from '../user/schema/user.schema';
 
 
 @Controller('customers')
@@ -20,6 +22,7 @@ export class CustomerController {
   constructor(private readonly service: CustomerService) { }
 
   @Post('add')
+  @Roles(Role.Admin, Role.Manager)
   create(@Body() createCustomerDto: CreateCustomerDto): Promise<Customer> {
     return this.service.create(createCustomerDto);
   }
@@ -41,6 +44,7 @@ export class CustomerController {
   }
 
   @Put(':id')
+  @Roles(Role.Admin, Role.Manager)
   update(
     @Param('id') id: string,
     @Body() updateCustomerDto: UpdateCustomerDto,
@@ -49,6 +53,7 @@ export class CustomerController {
   }
 
   @Delete(':id')
+  @Roles(Role.Admin, Role.Manager)
   remove(@Param('id') id: string): Promise<void> {
     return this.service.remove(id);
   }
