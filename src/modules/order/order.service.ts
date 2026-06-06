@@ -5,7 +5,6 @@ import { Order } from './schema/order.schema';
 import { CreateOrderDto } from './dto/create.dto';
 import { UpdateOrderDto } from './dto/update.dto';
 import { InvoiceService } from '../invoice/invoice.service';
-import { parseKarat } from 'src/utils';
 
 @Injectable()
 export class OrderService {
@@ -59,20 +58,7 @@ export class OrderService {
       return deleted;
     }
 
-    const invoice = await this.invoiceService.findOne(invoiceId)
-    if (!invoice)
-      throw new NotFoundException('invoice not found!')
-
-    let orders: Types.ObjectId[] = invoice.orders.filter(
-      (id) => !id.equals(order._id)
-    );
-    let totalWeight = invoice.totalWeight
-    let totalCash = invoice.totalCash
-
-    totalCash -= order.weight * order.perGram + (order.perItem * order.quantity);
-    totalWeight -= order.weight * parseKarat(order.karat) / 995;
-
-    await this.invoiceService.update(invoiceId, { orders, totalWeight, totalCash })
+    await this.invoiceService.detachOrder(invoiceId, order)
 
     const deleted = await this.model.findByIdAndDelete(order._id);
     if (!deleted) throw new NotFoundException('order not found');

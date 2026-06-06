@@ -6,7 +6,7 @@ import { Public } from "src/common/decorators/public.decorator";
 
 @Public()
 @Controller('auth')
-export class AuthControlller {
+export class AuthController {
     constructor(private authService: AuthService) { }
 
     @Post('register')

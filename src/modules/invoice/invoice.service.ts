@@ -9,7 +9,16 @@ import { IFilter } from 'src/common/types/filter';
 import { GetInvoicesFilterDto } from './dto/getAll.dto';
 import { OrderService } from 'src/modules/order/order.service';
 import { parseKarat } from 'src/utils';
+import { Karat } from 'src/modules/order/schema/order.schema';
 import { BalanceService } from 'src/modules/balance/balance.service';
+
+type OrderTotalsInput = {
+  weight: number;
+  perGram: number;
+  perItem: number;
+  quantity: number;
+  karat: Karat;
+};
 
 @Injectable()
 export class InvoiceService {
@@ -24,15 +33,8 @@ export class InvoiceService {
     const { orders, ...rest } = dto
     const orderResult = await this.orderService.createMany(dto.orders)
 
-    let ordersIds: Types.ObjectId[] = []
-    let totalWeight = 0
-    let totalCash = 0
-
-    orderResult.forEach((order) => {
-      ordersIds.push(order._id)
-      totalCash += order.weight * order.perGram + (order.perItem * order.quantity);
-      totalWeight += order.weight * parseKarat(order.karat) / 995;
-    })
+    const ordersIds = orderResult.map((order) => order._id)
+    const { totalWeight, totalCash } = this.computeTotals(orderResult)
 
     const session = await this.connection.startSession()
     try {
@@ -52,6 +54,19 @@ export class InvoiceService {
     } finally {
       await session.endSession()
     }
+  }
+
+  private computeTotals(orders: OrderTotalsInput[]) {
+    return orders.reduce(
+      (totals, order) => ({
+        totalCash:
+          totals.totalCash +
+          (order.weight * order.perGram + order.perItem * order.quantity),
+        totalWeight:
+          totals.totalWeight + (order.weight * parseKarat(order.karat)) / 995,
+      }),
+      { totalCash: 0, totalWeight: 0 },
+    );
   }
 
   filter(args: GetInvoicesFilterDto): IFilter {
@@ -99,9 +114,95 @@ export class InvoiceService {
   }
 
   async update(id: string, dto: UpdateInvoiceDto) {
-    const updated = await this.model.findByIdAndUpdate(id, dto, { new: true });
-    if (!updated) throw new NotFoundException('Invoice not found');
-    return updated;
+    const existing = await this.model.findById(id);
+    if (!existing) throw new NotFoundException('Invoice not found');
+
+    const { orders, customer, ...rest } = dto;
+    const newCustomerId = (customer ?? existing.customer).toString();
+
+    const session = await this.connection.startSession();
+    let createdOrderIds: Types.ObjectId[] = [];
+    try {
+      let invoice: any;
+      await session.withTransaction(async () => {
+        // Reverse the existing invoice: undo its balance impact and drop its orders.
+        await this.balanceService.updateByCustomer(
+          existing.customer.toString(),
+          -(existing.totalWeight ?? 0),
+          -(existing.totalCash ?? 0),
+        );
+        await Promise.all(
+          existing.orders.map((orderId) =>
+            this.orderService.remove(orderId.toString()),
+          ),
+        );
+
+        // Apply the new line items: recreate orders, recompute totals, re-credit balance.
+        const created = await this.orderService.createMany(orders ?? []);
+        createdOrderIds = created.map((order) => order._id);
+        const { totalWeight, totalCash } = this.computeTotals(created);
+        await this.balanceService.updateByCustomer(
+          newCustomerId,
+          totalWeight,
+          totalCash,
+        );
+
+        invoice = await this.model.findByIdAndUpdate(
+          id,
+          {
+            ...rest,
+            orders: createdOrderIds,
+            customer: new Types.ObjectId(newCustomerId),
+            totalWeight,
+            totalCash,
+          },
+          { new: true, session },
+        );
+      });
+      return invoice;
+    } catch (error) {
+      await Promise.all(
+        createdOrderIds.map((orderId) =>
+          this.orderService.remove(orderId.toString()),
+        ),
+      );
+      throw new InternalServerErrorException('Failed to update invoice');
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  // Removes a single order from an invoice: pulls it from the order list and
+  // reverses just that line's contribution to the invoice totals and balance.
+  async detachOrder(
+    invoiceId: string,
+    order: OrderTotalsInput & { _id: Types.ObjectId },
+  ) {
+    const invoice = await this.model.findById(invoiceId);
+    if (!invoice) throw new NotFoundException('invoice not found!');
+
+    const { totalWeight, totalCash } = this.computeTotals([order]);
+
+    const session = await this.connection.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await this.balanceService.updateByCustomer(
+          invoice.customer.toString(),
+          -totalWeight,
+          -totalCash,
+        );
+        await this.model.findByIdAndUpdate(
+          invoiceId,
+          {
+            $pull: { orders: order._id },
+            $inc: { totalWeight: -totalWeight, totalCash: -totalCash },
+          },
+          { session },
+        );
+      });
+    } finally {
+      await session.endSession();
+    }
   }
 
   async remove(id: string) {
