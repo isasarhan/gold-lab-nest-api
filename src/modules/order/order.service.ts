@@ -41,6 +41,33 @@ export class OrderService {
     return await this.model.find().where({ customer: id }).populate("customer");
   }
 
+  aggregateTypeBreakdown(customerId: string | null, start: Date, end: Date) {
+    const match: Record<string, any> = { date: { $gte: start, $lt: end } };
+    if (customerId) {
+      match.customer = new Types.ObjectId(customerId);
+    }
+    return this.model.aggregate([
+      { $match: match },
+      {
+        $group: {
+          _id: '$type',
+          count: { $sum: 1 },
+          totalQuantity: { $sum: '$quantity' },
+          totalWeight: { $sum: '$weight' },
+          totalCash: {
+            $sum: {
+              $add: [
+                { $multiply: ['$weight', '$perGram'] },
+                { $multiply: ['$perItem', '$quantity'] },
+              ],
+            },
+          },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+  }
+
   async update(id: string, dto: UpdateOrderDto) {
     const updated = await this.model.findByIdAndUpdate(id, dto, { new: true });
     if (!updated) throw new NotFoundException('Order not found');

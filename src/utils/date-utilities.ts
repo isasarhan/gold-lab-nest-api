@@ -2,6 +2,30 @@ export function getStartOfMonth(year: number, month: number) {
     return new Date(year, month, 1);
 }
 
+/**
+ * Resolves an analytics date window from optional filters, using the same
+ * precedence as AttendanceService.filter: explicit range -> year + month ->
+ * year (whole year) -> current year.
+ */
+export function resolveAnalyticsDateRange(args: {
+    year?: number;
+    month?: number;
+    startDate?: Date | string;
+    endDate?: Date | string;
+}): { start: Date; end: Date } {
+    if (args.startDate && args.endDate) {
+        return { start: new Date(args.startDate), end: new Date(args.endDate) };
+    }
+    const year = args.year || new Date().getFullYear();
+    if (args.month) {
+        return {
+            start: new Date(year, args.month - 1, 1),
+            end: new Date(year, args.month, 1),
+        };
+    }
+    return { start: new Date(year, 0, 1), end: new Date(year + 1, 0, 1) };
+}
+
 export const getAllYearMonths = (year: number) => {
     let months: Date[] = [];
     for (let i = 0; i < 12; i++) {

@@ -2,6 +2,7 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { AnalyticService } from './analytic.service';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from '../user/schema/user.schema';
+import { GetCustomerAnalyticsDto } from './dto/get-customer-analytics.dto';
 
 @Roles(Role.Admin, Role.Manager)
 @Controller('analytics')
@@ -21,6 +22,11 @@ export class AnalyticController {
     @Get("customer/receipts")
     findAll(@Query() args: { customerId: string, year: number }) {
         return this.service.getKaserGoldRevenue(args.customerId, args.year);
+    }
+
+    @Get("customer/order-types")
+    getCustomerOrderTypes(@Query() args: GetCustomerAnalyticsDto) {
+        return this.service.getCustomerOrderTypeBreakdown(args);
     }
 
 }
